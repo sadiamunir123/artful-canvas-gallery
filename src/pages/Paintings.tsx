@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { ShoppingCart } from "lucide-react";
 import { artworks } from "@/data/artworks";
+import { useCart } from "@/contexts/CartContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ArtworkZoom from "@/components/ArtworkZoom";
@@ -8,6 +10,7 @@ import ArtworkZoom from "@/components/ArtworkZoom";
 const Paintings = () => {
   const [selectedArtwork, setSelectedArtwork] = useState<string | null>(null);
   const [zoomArtwork, setZoomArtwork] = useState<string | null>(null);
+  const { addToCart } = useCart();
 
   const selected = artworks.find((a) => a.id === selectedArtwork);
   const zoomed = artworks.find((a) => a.id === zoomArtwork);
@@ -25,7 +28,7 @@ const Paintings = () => {
           </div>
 
           {/* Gallery grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {artworks.map((artwork) => (
               <div
                 key={artwork.id}
@@ -37,6 +40,7 @@ const Paintings = () => {
                     src={artwork.image}
                     alt={artwork.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-background/0 group-hover:bg-background/30 transition-colors duration-500 flex items-center justify-center">
                     <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-500 font-body text-sm tracking-widest uppercase text-foreground border border-foreground/50 px-6 py-2">
@@ -52,7 +56,12 @@ const Paintings = () => {
                 <div className="mt-4">
                   <h3 className="font-display text-xl text-foreground">{artwork.title}</h3>
                   <p className="font-body text-sm text-muted-foreground mt-1">{artwork.medium} — {artwork.year}</p>
-                  <p className="font-body text-sm text-primary mt-1">Rs {artwork.price.toLocaleString()}</p>
+                  <div className="flex items-center justify-between mt-1">
+                    <p className="font-body text-sm text-primary">Rs {artwork.price.toLocaleString()}</p>
+                    {!artwork.available && (
+                      <span className="font-body text-xs tracking-widest uppercase text-destructive">Sold</span>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -124,14 +133,34 @@ const Paintings = () => {
 
                 <p className="font-display text-2xl text-primary mb-6">Rs {selected.price.toLocaleString()}</p>
 
-                {selected.available && (
-                  <div className="flex gap-4">
+                {selected.available ? (
+                  <div className="flex gap-4 flex-wrap">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addToCart(selected);
+                      }}
+                      className="inline-flex items-center gap-2 px-8 py-3 border border-primary text-primary font-body text-sm tracking-widest uppercase hover:bg-primary hover:text-primary-foreground transition-colors"
+                    >
+                      <ShoppingCart size={16} /> Add to Cart
+                    </button>
                     <Link
-                      to="/contact"
+                      to="/cart"
+                      onClick={() => addToCart(selected)}
                       className="px-8 py-3 bg-primary text-primary-foreground font-body text-sm tracking-widest uppercase hover:bg-primary/90 transition-colors"
                     >
-                      Inquire to Purchase
+                      Buy Now
                     </Link>
+                    <Link
+                      to="/contact"
+                      className="px-8 py-3 border border-foreground/30 text-foreground font-body text-sm tracking-widest uppercase hover:border-primary hover:text-primary transition-colors"
+                    >
+                      Inquire
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="px-8 py-3 bg-destructive/20 border border-destructive/30 text-destructive font-body text-sm tracking-widest uppercase text-center">
+                    This Artwork Has Been Sold
                   </div>
                 )}
               </div>
