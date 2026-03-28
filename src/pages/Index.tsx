@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { artworks } from "@/data/artworks";
+import Navbar from "@/components/Navbar";
 
 const Index = () => {
   const [current, setCurrent] = useState(0);
@@ -17,7 +17,9 @@ const Index = () => {
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
-      {/* Slideshow */}
+      <Navbar />
+
+      {/* Slideshow — artwork only */}
       {slides.map((artwork, i) => (
         <div
           key={artwork.id}
@@ -32,50 +34,32 @@ const Index = () => {
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-background/20" />
+          {/* Subtle gradient for readability of controls */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-background/30" />
         </div>
       ))}
 
-      {/* Content overlay */}
-      <div className="relative z-10 flex flex-col justify-end h-full pb-24 px-6 md:px-16">
-        <div className="max-w-2xl animate-slide-up">
-          <p className="font-body text-xs tracking-[0.3em] uppercase text-primary mb-4">
-            {slides[current].category} — {slides[current].year}
-          </p>
-          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl text-foreground mb-4 leading-tight">
-            {slides[current].title}
-          </h1>
-          <p className="font-elegant text-lg md:text-xl text-foreground/70 mb-8 max-w-lg">
-            {slides[current].description.substring(0, 120)}...
-          </p>
-          <div className="flex gap-4">
-            <Link
-              to="/paintings"
-              className="inline-flex items-center px-8 py-3 bg-primary text-primary-foreground font-body text-sm tracking-widest uppercase hover:bg-primary/90 transition-colors"
-            >
-              View Collection
-            </Link>
-            <Link
-              to="/artist"
-              className="inline-flex items-center px-8 py-3 border border-foreground/30 text-foreground font-body text-sm tracking-widest uppercase hover:border-primary hover:text-primary transition-colors"
-            >
-              About the Artist
-            </Link>
-          </div>
-        </div>
+      {/* Minimal artwork title at bottom left */}
+      <div className="absolute bottom-10 left-6 md:left-16 z-10">
+        <p className="font-display text-xl md:text-2xl text-foreground/90 drop-shadow-lg">
+          {slides[current].title}
+        </p>
+        <p className="font-body text-xs tracking-widest uppercase text-foreground/50 mt-1">
+          {slides[current].category} — {slides[current].year}
+        </p>
+      </div>
 
-        {/* Slide controls */}
-        <div className="absolute bottom-8 right-6 md:right-16 flex items-center gap-4">
-          <button onClick={prev} className="p-2 border border-foreground/20 text-foreground/60 hover:text-primary hover:border-primary transition-colors">
-            <ChevronLeft size={20} />
-          </button>
-          <span className="font-body text-sm text-muted-foreground tabular-nums">
-            {String(current + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
-          </span>
-          <button onClick={next} className="p-2 border border-foreground/20 text-foreground/60 hover:text-primary hover:border-primary transition-colors">
-            <ChevronRight size={20} />
-          </button>
-        </div>
+      {/* Slide controls */}
+      <div className="absolute bottom-10 right-6 md:right-16 z-10 flex items-center gap-4">
+        <button onClick={prev} className="p-2 border border-foreground/20 text-foreground/60 hover:text-primary hover:border-primary transition-colors">
+          <ChevronLeft size={20} />
+        </button>
+        <span className="font-body text-sm text-muted-foreground tabular-nums">
+          {String(current + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
+        </span>
+        <button onClick={next} className="p-2 border border-foreground/20 text-foreground/60 hover:text-primary hover:border-primary transition-colors">
+          <ChevronRight size={20} />
+        </button>
       </div>
 
       {/* Brand line */}
