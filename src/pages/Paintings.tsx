@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
-import { artworks } from "@/data/artworks";
+import { useArtworks } from "@/hooks/useArtworks";
 import { useCart } from "@/contexts/CartContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -11,6 +11,7 @@ const Paintings = () => {
   const [selectedArtwork, setSelectedArtwork] = useState<string | null>(null);
   const [zoomArtwork, setZoomArtwork] = useState<string | null>(null);
   const { addToCart } = useCart();
+  const { data: artworks = [], isLoading } = useArtworks();
 
   const selected = artworks.find((a) => a.id === selectedArtwork);
   const zoomed = artworks.find((a) => a.id === zoomArtwork);
@@ -27,49 +28,53 @@ const Paintings = () => {
             <div className="brand-line w-16 mt-4" />
           </div>
 
-          {/* Gallery grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {artworks.map((artwork) => (
-              <div
-                key={artwork.id}
-                className="group cursor-pointer"
-                onClick={() => setSelectedArtwork(artwork.id)}
-              >
-                <div className="relative overflow-hidden bg-secondary aspect-[4/5]">
-                  <img
-                    src={artwork.image}
-                    alt={artwork.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-background/0 group-hover:bg-background/30 transition-colors duration-500 flex items-center justify-center">
-                    <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-500 font-body text-sm tracking-widest uppercase text-foreground border border-foreground/50 px-6 py-2">
-                      View Details
-                    </span>
-                  </div>
-                  {!artwork.available && (
-                    <div className="absolute top-4 right-4 bg-destructive/90 text-destructive-foreground font-body text-xs tracking-widest uppercase px-3 py-1">
-                      Sold
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <p className="font-body text-muted-foreground animate-pulse">Loading collection...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {artworks.map((artwork) => (
+                <div
+                  key={artwork.id}
+                  className="group cursor-pointer"
+                  onClick={() => setSelectedArtwork(artwork.id)}
+                >
+                  <div className="relative overflow-hidden bg-secondary aspect-[4/5]">
+                    <img
+                      src={artwork.image}
+                      alt={artwork.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-background/0 group-hover:bg-background/30 transition-colors duration-500 flex items-center justify-center">
+                      <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-500 font-body text-sm tracking-widest uppercase text-foreground border border-foreground/50 px-6 py-2">
+                        View Details
+                      </span>
                     </div>
-                  )}
-                </div>
-                <div className="mt-4">
-                  <h3 className="font-display text-xl text-foreground">{artwork.title}</h3>
-                  <p className="font-body text-sm text-muted-foreground mt-1">{artwork.medium} — {artwork.year}</p>
-                  <div className="flex items-center justify-between mt-1">
-                    <p className="font-body text-sm text-primary">Rs {artwork.price.toLocaleString()}</p>
                     {!artwork.available && (
-                      <span className="font-body text-xs tracking-widest uppercase text-destructive">Sold</span>
+                      <div className="absolute top-4 right-4 bg-destructive/90 text-destructive-foreground font-body text-xs tracking-widest uppercase px-3 py-1">
+                        Sold
+                      </div>
                     )}
                   </div>
+                  <div className="mt-4">
+                    <h3 className="font-display text-xl text-foreground">{artwork.title}</h3>
+                    <p className="font-body text-sm text-muted-foreground mt-1">{artwork.medium} — {artwork.year}</p>
+                    <div className="flex items-center justify-between mt-1">
+                      <p className="font-body text-sm text-primary">Rs {artwork.price.toLocaleString()}</p>
+                      {!artwork.available && (
+                        <span className="font-body text-xs tracking-widest uppercase text-destructive">Sold</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Detail modal */}
       {selected && (
         <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-md overflow-y-auto">
           <button
@@ -169,7 +174,6 @@ const Paintings = () => {
         </div>
       )}
 
-      {/* Zoom viewer */}
       {zoomed && (
         <ArtworkZoom
           image={zoomed.image}

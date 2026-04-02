@@ -6,15 +6,15 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 const Cart = () => {
-  const { items, removeFromCart, clearCart, totalPrice } = useCart();
+  const { items, removeFromCart, totalPrice, submitOrder, isSubmitting } = useCart();
   const [showCheckout, setShowCheckout] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", address: "", city: "", notes: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", address: "" });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setOrderPlaced(true);
-    clearCart();
+    const success = await submitOrder(form);
+    if (success) setOrderPlaced(true);
   };
 
   if (orderPlaced) {
@@ -70,7 +70,6 @@ const Cart = () => {
                   { key: "email", label: "Email", type: "email" },
                   { key: "phone", label: "Phone Number", type: "tel" },
                   { key: "address", label: "Shipping Address", type: "text" },
-                  { key: "city", label: "City", type: "text" },
                 ].map(({ key, label, type }) => (
                   <div key={key}>
                     <label className="font-body text-xs tracking-widest uppercase text-muted-foreground block mb-2">{label}</label>
@@ -83,15 +82,6 @@ const Cart = () => {
                     />
                   </div>
                 ))}
-                <div>
-                  <label className="font-body text-xs tracking-widest uppercase text-muted-foreground block mb-2">Notes (Optional)</label>
-                  <textarea
-                    value={form.notes}
-                    onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-                    rows={3}
-                    className="w-full bg-secondary border border-border px-4 py-3 font-body text-sm text-foreground focus:outline-none focus:border-primary transition-colors resize-none"
-                  />
-                </div>
               </div>
 
               <div>
@@ -110,9 +100,10 @@ const Cart = () => {
                 </div>
                 <button
                   type="submit"
-                  className="w-full mt-6 px-8 py-4 bg-primary text-primary-foreground font-body text-sm tracking-widest uppercase hover:bg-primary/90 transition-colors"
+                  disabled={isSubmitting}
+                  className="w-full mt-6 px-8 py-4 bg-primary text-primary-foreground font-body text-sm tracking-widest uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
                 >
-                  Place Order
+                  {isSubmitting ? "Placing Order..." : "Place Order"}
                 </button>
                 <button
                   type="button"
