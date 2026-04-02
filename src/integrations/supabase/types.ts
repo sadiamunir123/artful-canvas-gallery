@@ -14,7 +14,126 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      artworks: {
+        Row: {
+          available: boolean
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          medium: string | null
+          price: number
+          size: string | null
+          title: string
+          updated_at: string
+          year: string | null
+        }
+        Insert: {
+          available?: boolean
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          medium?: string | null
+          price: number
+          size?: string | null
+          title: string
+          updated_at?: string
+          year?: string | null
+        }
+        Update: {
+          available?: boolean
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          medium?: string | null
+          price?: number
+          size?: string | null
+          title?: string
+          updated_at?: string
+          year?: string | null
+        }
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          artwork_id: string
+          created_at: string
+          id: string
+          order_id: string
+          price_at_purchase: number
+        }
+        Insert: {
+          artwork_id: string
+          created_at?: string
+          id?: string
+          order_id: string
+          price_at_purchase: number
+        }
+        Update: {
+          artwork_id?: string
+          created_at?: string
+          id?: string
+          order_id?: string
+          price_at_purchase?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_artwork_id_fkey"
+            columns: ["artwork_id"]
+            isOneToOne: false
+            referencedRelation: "artworks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          created_at: string
+          customer_address: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          id: string
+          status: string
+          total_price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_address?: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          id?: string
+          status?: string
+          total_price: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_address?: string | null
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          id?: string
+          status?: string
+          total_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
