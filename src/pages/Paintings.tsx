@@ -17,7 +17,7 @@ const Paintings = () => {
   const zoomed = artworks.find((a) => a.id === zoomArtwork);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-page">
       <Navbar />
 
       <div className="pt-24 pb-16 px-6 md:px-12">

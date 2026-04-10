@@ -28,7 +28,7 @@ const services = [
 
 const Services = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-page">
       <Navbar />
 
       <div className="pt-24 pb-16 px-6 md:px-12">

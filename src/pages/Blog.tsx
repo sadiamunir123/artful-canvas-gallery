@@ -9,7 +9,7 @@ const Blog = () => {
   const post = blogPosts.find((p) => p.id === selectedPost);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-page">
       <Navbar />
       <div className="pt-24 pb-16 px-6 md:px-12">
         <div className="container mx-auto">
