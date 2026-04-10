@@ -46,13 +46,16 @@
     --sidebar-ring: 43 72% 55%;
 
     /* Custom tokens */
-    --gallery-dark: 0 0% 5%;
+    --gallery-dark: 0 0% 4%;
     --gallery-warm: 30 15% 12%;
     --gold: 43 72% 55%;
     --gold-muted: 43 40% 35%;
     --brand-red: 0 75% 50%;
     --brand-yellow: 45 90% 55%;
     --brand-blue: 220 75% 50%;
+
+    /* Page background - warm charcoal, distinct from navbar/footer */
+    --page: 20 8% 11%;
   }
 
   * {
