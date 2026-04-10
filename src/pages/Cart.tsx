@@ -19,7 +19,7 @@ const Cart = () => {
 
   if (orderPlaced) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-page">
         <Navbar />
         <div className="pt-24 pb-16 px-6 md:px-12 flex items-center justify-center min-h-[80vh]">
           <div className="text-center max-w-md">
@@ -39,7 +39,7 @@ const Cart = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-page">
       <Navbar />
       <div className="pt-24 pb-16 px-6 md:px-12">
         <div className="container mx-auto max-w-4xl">
