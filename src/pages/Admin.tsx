@@ -182,71 +182,68 @@ const Admin = () => {
         onSignOut={() => void signOut()}
       />
 
-          {/* Add form */}
-          {showAddForm && (
-            <div className="mb-8 p-6 border border-primary/30 bg-card">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="font-display text-xl text-foreground">Add New Artwork</h2>
-                <button onClick={() => setShowAddForm(false)} className="text-muted-foreground hover:text-foreground"><X size={20} /></button>
-              </div>
-              <form onSubmit={handleAdd}>
-                {formFields}
-                <button type="submit" className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-body text-sm tracking-widest uppercase hover:bg-primary/90 transition-colors">
-                  <Save size={16} /> Save Artwork
-                </button>
-              </form>
-            </div>
-          )}
-
-          {/* Artworks list */}
-          {isLoading ? (
-            <p className="font-body text-muted-foreground animate-pulse">Loading...</p>
-          ) : (
-            <div className="space-y-4">
-              {artworks.map((artwork) => (
-                <div key={artwork.id} className="flex flex-col sm:flex-row gap-4 p-4 border border-border bg-card">
-                  <img src={artwork.image} alt={artwork.title} className="w-20 h-24 object-cover flex-shrink-0" />
-                  
-                  {editingId === artwork.id ? (
-                    <div className="flex-1">
-                      {formFields}
-                      <div className="flex gap-3 mt-4">
-                        <button onClick={handleSaveEdit} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-body text-xs tracking-widest uppercase hover:bg-primary/90 transition-colors">
-                          <Save size={14} /> Save
-                        </button>
-                        <button onClick={() => { setEditingId(null); setForm(emptyForm); }} className="inline-flex items-center gap-2 px-4 py-2 border border-border text-foreground font-body text-xs tracking-widest uppercase hover:border-primary transition-colors">
-                          <X size={14} /> Cancel
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-display text-lg text-foreground">{artwork.title}</h3>
-                        <p className="font-body text-sm text-muted-foreground">{artwork.medium} — {artwork.size} — {artwork.year}</p>
-                        <p className="font-body text-sm text-primary mt-1">Rs {artwork.price.toLocaleString()}</p>
-                        <span className={`inline-block mt-1 font-body text-xs tracking-widest uppercase ${artwork.available ? "text-green-400" : "text-destructive"}`}>
-                          {artwork.available ? "Available" : "Sold"}
-                        </span>
-                      </div>
-                      <div className="flex sm:flex-col gap-2 flex-shrink-0">
-                        <button onClick={() => startEdit(artwork)} className="p-2 text-muted-foreground hover:text-primary transition-colors" title="Edit">
-                          <Pencil size={16} />
-                        </button>
-                        <button onClick={() => handleToggleAvailability(artwork)} className="p-2 text-muted-foreground hover:text-primary transition-colors" title="Toggle availability">
-                          {artwork.available ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
-                        </button>
-                        <button onClick={() => handleDelete(artwork.id)} className="p-2 text-muted-foreground hover:text-destructive transition-colors" title="Delete">
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+      {showAddForm && (
+        <div className="mb-8 p-6 border border-primary/30 bg-card">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="font-display text-xl text-foreground">Add New Artwork</h2>
+            <button onClick={() => setShowAddForm(false)} className="text-muted-foreground hover:text-foreground"><X size={20} /></button>
+          </div>
+          <form onSubmit={handleAdd}>
+            {formFields}
+            <button type="submit" className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-body text-sm tracking-widest uppercase hover:bg-primary/90 transition-colors">
+              <Save size={16} /> Save Artwork
+            </button>
+          </form>
         </div>
+      )}
+
+      {isLoading ? (
+        <p className="font-body text-muted-foreground animate-pulse">Loading...</p>
+      ) : (
+        <div className="space-y-4">
+          {artworks.map((artwork) => (
+            <div key={artwork.id} className="flex flex-col sm:flex-row gap-4 p-4 border border-border bg-card">
+              <img src={artwork.image} alt={artwork.title} className="w-20 h-24 object-cover flex-shrink-0" />
+
+              {editingId === artwork.id ? (
+                <div className="flex-1">
+                  {formFields}
+                  <div className="flex gap-3 mt-4">
+                    <button onClick={handleSaveEdit} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-body text-xs tracking-widest uppercase hover:bg-primary/90 transition-colors">
+                      <Save size={14} /> Save
+                    </button>
+                    <button onClick={() => { setEditingId(null); setForm(emptyForm); }} className="inline-flex items-center gap-2 px-4 py-2 border border-border text-foreground font-body text-xs tracking-widest uppercase hover:border-primary transition-colors">
+                      <X size={14} /> Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-display text-lg text-foreground">{artwork.title}</h3>
+                    <p className="font-body text-sm text-muted-foreground">{artwork.medium} — {artwork.size} — {artwork.year}</p>
+                    <p className="font-body text-sm text-primary mt-1">Rs {artwork.price.toLocaleString()}</p>
+                    <span className={`inline-block mt-1 font-body text-xs tracking-widest uppercase ${artwork.available ? "text-green-400" : "text-destructive"}`}>
+                      {artwork.available ? "Available" : "Sold"}
+                    </span>
+                  </div>
+                  <div className="flex sm:flex-col gap-2 flex-shrink-0">
+                    <button onClick={() => startEdit(artwork)} className="p-2 text-muted-foreground hover:text-primary transition-colors" title="Edit">
+                      <Pencil size={16} />
+                    </button>
+                    <button onClick={() => handleToggleAvailability(artwork)} className="p-2 text-muted-foreground hover:text-primary transition-colors" title="Toggle availability">
+                      {artwork.available ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
+                    </button>
+                    <button onClick={() => handleDelete(artwork.id)} className="p-2 text-muted-foreground hover:text-destructive transition-colors" title="Delete">
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 
