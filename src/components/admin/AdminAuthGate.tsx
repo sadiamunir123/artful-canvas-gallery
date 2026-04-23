@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Lock, LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { ADMIN_EMAIL, useAdminAuth } from "@/hooks/useAdminAuth";
 
 type AdminAuthGateProps = {
-  onAuthenticated: () => React.ReactNode;
+  onAuthenticated: () => ReactNode;
 };
 
 export const AdminAuthGate = ({ onAuthenticated }: AdminAuthGateProps) => {
