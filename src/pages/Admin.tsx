@@ -176,14 +176,11 @@ const Admin = () => {
   );
 
   const adminContent = () => (
-    <div className="min-h-screen bg-page">
-      <Navbar />
-      <div className="pt-24 pb-16 px-6 md:px-12">
-        <div className="container mx-auto max-w-5xl">
-          <AdminHeader
-            onAddArtwork={() => { setShowAddForm(true); setEditingId(null); setForm(emptyForm); }}
-            onSignOut={() => void signOut()}
-          />
+    <div className="container mx-auto max-w-5xl w-full">
+      <AdminHeader
+        onAddArtwork={() => { setShowAddForm(true); setEditingId(null); setForm(emptyForm); }}
+        onSignOut={() => void signOut()}
+      />
 
           {/* Add form */}
           {showAddForm && (
@@ -250,8 +247,6 @@ const Admin = () => {
             </div>
           )}
         </div>
-      </div>
-      <Footer />
     </div>
   );
 
