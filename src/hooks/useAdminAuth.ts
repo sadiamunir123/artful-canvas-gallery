@@ -147,6 +147,47 @@ export const useAdminAuth = () => {
     return true;
   }, []);
 
+  const requestPasswordReset = useCallback(async (email: string) => {
+    setIsSubmitting(true);
+    setAuthError(null);
+
+    if (email.trim().toLowerCase() !== ADMIN_EMAIL) {
+      setIsSubmitting(false);
+      setAuthError(`Password reset is only available for ${ADMIN_EMAIL}.`);
+      return false;
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    setIsSubmitting(false);
+
+    if (error) {
+      setAuthError(error.message);
+      return false;
+    }
+
+    setAuthError("Password reset email sent. Check your inbox and spam folder.");
+    return true;
+  }, []);
+
+  const updatePassword = useCallback(async (password: string) => {
+    setIsSubmitting(true);
+    setAuthError(null);
+
+    const { error } = await supabase.auth.updateUser({ password });
+
+    setIsSubmitting(false);
+
+    if (error) {
+      setAuthError(error.message);
+      return false;
+    }
+
+    return true;
+  }, []);
+
   const signOut = useCallback(async () => {
     setAuthError(null);
     await supabase.auth.signOut();
@@ -164,6 +205,8 @@ export const useAdminAuth = () => {
     signIn,
     signUp,
     signInWithGoogle,
+    requestPasswordReset,
+    updatePassword,
     signOut,
   };
 };
