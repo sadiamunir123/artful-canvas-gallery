@@ -5,10 +5,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Lock, Plus, Pencil, Trash2, ToggleLeft, ToggleRight, Save, X, ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
-
-const ADMIN_PASSWORD = "haqarts2024";
+import { Pencil, Trash2, ToggleLeft, ToggleRight, Save, X } from "lucide-react";
+import { AdminAuthGate } from "@/components/admin/AdminAuthGate";
+import { AdminHeader } from "@/components/admin/AdminHeader";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 const emptyForm = {
   title: "",
@@ -23,26 +23,14 @@ const emptyForm = {
 };
 
 const Admin = () => {
-  const [authenticated, setAuthenticated] = useState(false);
-  const [password, setPassword] = useState("");
-  const [passwordError, setPasswordError] = useState(false);
   const { data: artworks = [], isLoading } = useArtworks();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { signOut } = useAdminAuth();
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
-      setAuthenticated(true);
-      setPasswordError(false);
-    } else {
-      setPasswordError(true);
-    }
-  };
 
   const handleToggleAvailability = async (artwork: Artwork) => {
     const { error } = await supabase
@@ -132,40 +120,6 @@ const Admin = () => {
     }
   };
 
-  if (!authenticated) {
-    return (
-      <div className="min-h-screen bg-page">
-        <Navbar />
-        <div className="pt-24 pb-16 px-6 md:px-12 flex items-center justify-center min-h-[80vh]">
-          <form onSubmit={handleLogin} className="w-full max-w-sm space-y-6">
-            <div className="text-center">
-              <Lock className="mx-auto mb-4 text-primary" size={40} />
-              <h1 className="font-display text-3xl text-foreground mb-2">Admin Access</h1>
-              <p className="font-body text-sm text-muted-foreground">Enter admin password to continue</p>
-            </div>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              className="w-full bg-secondary border border-border px-4 py-3 font-body text-sm text-foreground focus:outline-none focus:border-primary transition-colors"
-            />
-            {passwordError && (
-              <p className="font-body text-xs text-destructive">Incorrect password</p>
-            )}
-            <button
-              type="submit"
-              className="w-full px-8 py-3 bg-primary text-primary-foreground font-body text-sm tracking-widest uppercase hover:bg-primary/90 transition-colors"
-            >
-              Enter
-            </button>
-          </form>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
   const formFields = (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {[
@@ -221,26 +175,15 @@ const Admin = () => {
     </div>
   );
 
-  return (
+  const adminContent = () => (
     <div className="min-h-screen bg-page">
       <Navbar />
       <div className="pt-24 pb-16 px-6 md:px-12">
         <div className="container mx-auto max-w-5xl">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <Link to="/" className="inline-flex items-center gap-2 font-body text-sm text-muted-foreground hover:text-primary transition-colors mb-2">
-                <ArrowLeft size={16} /> Back to Site
-              </Link>
-              <h1 className="font-display text-3xl md:text-4xl text-foreground">Admin Panel</h1>
-              <div className="brand-line w-16 mt-3" />
-            </div>
-            <button
-              onClick={() => { setShowAddForm(true); setEditingId(null); setForm(emptyForm); }}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-body text-sm tracking-widest uppercase hover:bg-primary/90 transition-colors"
-            >
-              <Plus size={16} /> Add Artwork
-            </button>
-          </div>
+          <AdminHeader
+            onAddArtwork={() => { setShowAddForm(true); setEditingId(null); setForm(emptyForm); }}
+            onSignOut={() => void signOut()}
+          />
 
           {/* Add form */}
           {showAddForm && (
@@ -307,6 +250,16 @@ const Admin = () => {
             </div>
           )}
         </div>
+      </div>
+      <Footer />
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-page">
+      <Navbar />
+      <div className="pt-24 pb-16 px-6 md:px-12 flex items-center justify-center min-h-[80vh]">
+        <AdminAuthGate onAuthenticated={adminContent} />
       </div>
       <Footer />
     </div>
