@@ -12,6 +12,7 @@ import Contact from "./pages/Contact.tsx";
 import Cart from "./pages/Cart.tsx";
 import Blog from "./pages/Blog.tsx";
 import Admin from "./pages/Admin.tsx";
+import ResetPassword from "./pages/ResetPassword.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/cart" element={<Cart />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

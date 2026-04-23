@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Lock, LogIn, UserPlus } from "lucide-react";
+import { Eye, EyeOff, Lock, LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -21,9 +21,11 @@ export const AdminAuthGate = ({ onAuthenticated }: AdminAuthGateProps) => {
     signIn,
     signUp,
     signInWithGoogle,
+    requestPasswordReset,
     signOut,
   } = useAdminAuth();
   const [form, setForm] = useState({ email: ADMIN_EMAIL, password: "" });
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,18 +85,23 @@ export const AdminAuthGate = ({ onAuthenticated }: AdminAuthGateProps) => {
         </div>
         <div>
           <label className="font-body text-xs tracking-widest uppercase text-muted-foreground block mb-2">Password</label>
-          <Input
-            type="password"
-            value={form.password}
-            onChange={(e) => setForm((current) => ({ ...current, password: e.target.value }))}
-            className="bg-secondary"
-            minLength={8}
-            required
-          />
+          <div className="relative">
+            <Input
+              type={showPassword ? "text" : "password"}
+              value={form.password}
+              onChange={(e) => setForm((current) => ({ ...current, password: e.target.value }))}
+              className="bg-secondary pr-12"
+              minLength={8}
+              required
+            />
+            <button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute inset-y-0 right-0 px-3 text-muted-foreground hover:text-primary transition-colors" aria-label={showPassword ? "Hide password" : "Show password"}>
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
         </div>
       </div>
 
-      {authError && <p className="font-body text-xs text-destructive">{authError}</p>}
+      {authError && <p className={`font-body text-xs ${authError.includes("sent") ? "text-muted-foreground" : "text-destructive"}`}>{authError}</p>}
 
       <div className="space-y-3">
         <Button type="submit" className="w-full gap-2" disabled={isSubmitting}>
@@ -108,6 +115,14 @@ export const AdminAuthGate = ({ onAuthenticated }: AdminAuthGateProps) => {
       </div>
 
       <Separator />
+
+      <button
+        type="button"
+        onClick={() => void requestPasswordReset(form.email)}
+        className="w-full font-body text-sm text-primary hover:text-primary/80 transition-colors"
+      >
+        Forgot password?
+      </button>
 
       <button
         type="button"
