@@ -44,24 +44,31 @@ const Paintings = () => {
                     <img
                       src={artwork.image}
                       alt={artwork.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${
+                        artwork.available ? "" : "grayscale-[40%] opacity-90"
+                      }`}
                       loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-background/0 group-hover:bg-background/30 transition-colors duration-500 flex items-center justify-center">
-                      <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-500 font-body text-sm tracking-widest uppercase text-foreground border border-foreground/50 px-6 py-2">
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-background/0 to-background/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute inset-x-0 bottom-0 p-5 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
+                      <span className="inline-block font-body text-xs tracking-widest uppercase text-foreground border border-foreground/60 px-4 py-1.5 backdrop-blur-sm">
                         View Details
                       </span>
                     </div>
-                    {!artwork.available && (
-                      <div className="absolute top-4 right-4 bg-destructive/90 text-destructive-foreground font-body text-xs tracking-widest uppercase px-3 py-1">
+                    {!artwork.available ? (
+                      <div className="absolute top-4 right-4 bg-destructive/95 text-destructive-foreground font-body text-[10px] tracking-widest uppercase px-3 py-1 shadow-lg">
                         Sold
+                      </div>
+                    ) : (
+                      <div className="absolute top-4 left-4 bg-card/80 backdrop-blur-sm border border-primary/40 text-primary font-body text-[10px] tracking-widest uppercase px-3 py-1">
+                        {artwork.category}
                       </div>
                     )}
                   </div>
                   <div className="mt-4">
-                    <h3 className="font-display text-xl text-foreground">{artwork.title}</h3>
+                    <h3 className="font-display text-xl text-foreground group-hover:text-primary transition-colors">{artwork.title}</h3>
                     <p className="font-body text-sm text-muted-foreground mt-1">{artwork.medium} — {artwork.year}</p>
-                    <div className="flex items-center justify-between mt-1">
+                    <div className="flex items-center justify-between mt-2">
                       <p className="font-body text-sm text-primary">Rs {artwork.price.toLocaleString()}</p>
                       {!artwork.available && (
                         <span className="font-body text-xs tracking-widest uppercase text-destructive">Sold</span>
