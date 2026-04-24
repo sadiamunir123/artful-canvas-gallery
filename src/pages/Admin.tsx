@@ -289,6 +289,28 @@ const Admin = () => {
         resultCount={filteredArtworks.length}
       />
 
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        onClear={() => setSelectedIds(new Set())}
+        onMarkAvailable={() => handleBulkAvailability(true)}
+        onMarkSold={() => handleBulkAvailability(false)}
+        onApplyPrice={handleBulkPrice}
+      />
+
+      {filteredArtworks.length > 0 && (
+        <label className="flex items-center gap-2 mb-3 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={filteredArtworks.every((a) => selectedIds.has(a.id))}
+            onChange={toggleSelectAllVisible}
+            className="h-4 w-4 accent-primary cursor-pointer"
+          />
+          <span className="font-body text-xs tracking-widest uppercase text-muted-foreground">
+            Select all visible
+          </span>
+        </label>
+      )}
+
       {isLoading ? (
         <p className="font-body text-muted-foreground animate-pulse">Loading...</p>
       ) : filteredArtworks.length === 0 ? (
