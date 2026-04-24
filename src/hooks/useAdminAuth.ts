@@ -82,6 +82,29 @@ export const useAdminAuth = () => {
     };
   }, [syncAdminState]);
 
+  // Idle auto sign-out for admin security
+  const idleTimerRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!session) return;
+
+    const resetTimer = () => {
+      if (idleTimerRef.current) window.clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = window.setTimeout(() => {
+        void supabase.auth.signOut();
+        setAuthError("You have been signed out due to inactivity.");
+      }, IDLE_TIMEOUT_MS);
+    };
+
+    const events: (keyof WindowEventMap)[] = ["mousemove", "keydown", "click", "scroll", "touchstart"];
+    events.forEach((e) => window.addEventListener(e, resetTimer, { passive: true }));
+    resetTimer();
+
+    return () => {
+      events.forEach((e) => window.removeEventListener(e, resetTimer));
+      if (idleTimerRef.current) window.clearTimeout(idleTimerRef.current);
+    };
+  }, [session]);
+
   const signIn = useCallback(async (email: string, password: string) => {
     setIsSubmitting(true);
     setAuthError(null);
