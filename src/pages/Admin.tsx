@@ -10,6 +10,7 @@ import { AdminAuthGate } from "@/components/admin/AdminAuthGate";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { AdminStats } from "@/components/admin/AdminStats";
 import { AdminToolbar, type AvailabilityFilter } from "@/components/admin/AdminToolbar";
+import { BulkActionBar } from "@/components/admin/BulkActionBar";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 const emptyForm = {
@@ -35,6 +36,7 @@ const Admin = () => {
   const [form, setForm] = useState(emptyForm);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<AvailabilityFilter>("all");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const filteredArtworks = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -138,6 +140,67 @@ const Admin = () => {
     }
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAllVisible = () => {
+    setSelectedIds((prev) => {
+      const allSelected = filteredArtworks.length > 0 && filteredArtworks.every((a) => prev.has(a.id));
+      if (allSelected) {
+        const next = new Set(prev);
+        filteredArtworks.forEach((a) => next.delete(a.id));
+        return next;
+      }
+      const next = new Set(prev);
+      filteredArtworks.forEach((a) => next.add(a.id));
+      return next;
+    });
+  };
+
+  const handleBulkAvailability = async (available: boolean) => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    const { error } = await supabase.from("artworks").update({ available }).in("id", ids);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      await queryClient.invalidateQueries({ queryKey: ["artworks"] });
+      toast({ title: `${ids.length} artwork${ids.length === 1 ? "" : "s"} marked ${available ? "available" : "sold"}` });
+      setSelectedIds(new Set());
+    }
+  };
+
+  const handleBulkPrice = async (mode: "set" | "increase" | "decrease", value: number) => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    const targets = artworks.filter((a) => selectedIds.has(a.id));
+    const updates = targets.map((a) => {
+      let newPrice = a.price;
+      if (mode === "set") newPrice = Math.round(value);
+      else if (mode === "increase") newPrice = Math.round(a.price + value);
+      else newPrice = Math.max(0, Math.round(a.price - value));
+      return { id: a.id, price: newPrice };
+    });
+    const results = await Promise.all(
+      updates.map((u) => supabase.from("artworks").update({ price: u.price }).eq("id", u.id)),
+    );
+    const firstError = results.find((r) => r.error)?.error;
+    if (firstError) {
+      toast({ title: "Error", description: firstError.message, variant: "destructive" });
+    } else {
+      await queryClient.invalidateQueries({ queryKey: ["artworks"] });
+      const label = mode === "set" ? `set to Rs ${value.toLocaleString()}` : mode === "increase" ? `increased by Rs ${value.toLocaleString()}` : `decreased by Rs ${value.toLocaleString()}`;
+      toast({ title: `Prices ${label}`, description: `${ids.length} artwork${ids.length === 1 ? "" : "s"} updated` });
+      setSelectedIds(new Set());
+    }
+  };
+
   const formFields = (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {[
@@ -226,6 +289,28 @@ const Admin = () => {
         resultCount={filteredArtworks.length}
       />
 
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        onClear={() => setSelectedIds(new Set())}
+        onMarkAvailable={() => handleBulkAvailability(true)}
+        onMarkSold={() => handleBulkAvailability(false)}
+        onApplyPrice={handleBulkPrice}
+      />
+
+      {filteredArtworks.length > 0 && (
+        <label className="flex items-center gap-2 mb-3 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={filteredArtworks.every((a) => selectedIds.has(a.id))}
+            onChange={toggleSelectAllVisible}
+            className="h-4 w-4 accent-primary cursor-pointer"
+          />
+          <span className="font-body text-xs tracking-widest uppercase text-muted-foreground">
+            Select all visible
+          </span>
+        </label>
+      )}
+
       {isLoading ? (
         <p className="font-body text-muted-foreground animate-pulse">Loading...</p>
       ) : filteredArtworks.length === 0 ? (
@@ -237,8 +322,24 @@ const Admin = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredArtworks.map((artwork) => (
-            <div key={artwork.id} className="flex flex-col sm:flex-row gap-4 p-4 border border-border bg-card hover:border-primary/30 transition-colors">
+          {filteredArtworks.map((artwork) => {
+            const isSelected = selectedIds.has(artwork.id);
+            return (
+            <div
+              key={artwork.id}
+              className={`flex flex-col sm:flex-row gap-4 p-4 border bg-card transition-colors ${
+                isSelected ? "border-primary" : "border-border hover:border-primary/30"
+              }`}
+            >
+              <div className="flex sm:flex-col items-center sm:items-start gap-2">
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => toggleSelect(artwork.id)}
+                  className="h-4 w-4 accent-primary cursor-pointer"
+                  aria-label={`Select ${artwork.title}`}
+                />
+              </div>
               <img src={artwork.image} alt={artwork.title} className="w-full sm:w-20 h-40 sm:h-24 object-cover flex-shrink-0" />
 
               {editingId === artwork.id ? (
@@ -277,7 +378,8 @@ const Admin = () => {
                 </>
               )}
             </div>
-          ))}
+          );
+          })}
         </div>
       )}
     </div>
