@@ -322,8 +322,24 @@ const Admin = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredArtworks.map((artwork) => (
-            <div key={artwork.id} className="flex flex-col sm:flex-row gap-4 p-4 border border-border bg-card hover:border-primary/30 transition-colors">
+          {filteredArtworks.map((artwork) => {
+            const isSelected = selectedIds.has(artwork.id);
+            return (
+            <div
+              key={artwork.id}
+              className={`flex flex-col sm:flex-row gap-4 p-4 border bg-card transition-colors ${
+                isSelected ? "border-primary" : "border-border hover:border-primary/30"
+              }`}
+            >
+              <div className="flex sm:flex-col items-center sm:items-start gap-2">
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => toggleSelect(artwork.id)}
+                  className="h-4 w-4 accent-primary cursor-pointer"
+                  aria-label={`Select ${artwork.title}`}
+                />
+              </div>
               <img src={artwork.image} alt={artwork.title} className="w-full sm:w-20 h-40 sm:h-24 object-cover flex-shrink-0" />
 
               {editingId === artwork.id ? (
