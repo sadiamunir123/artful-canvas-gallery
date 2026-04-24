@@ -140,7 +140,66 @@ const Admin = () => {
     }
   };
 
-  const formFields = (
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAllVisible = () => {
+    setSelectedIds((prev) => {
+      const allSelected = filteredArtworks.length > 0 && filteredArtworks.every((a) => prev.has(a.id));
+      if (allSelected) {
+        const next = new Set(prev);
+        filteredArtworks.forEach((a) => next.delete(a.id));
+        return next;
+      }
+      const next = new Set(prev);
+      filteredArtworks.forEach((a) => next.add(a.id));
+      return next;
+    });
+  };
+
+  const handleBulkAvailability = async (available: boolean) => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    const { error } = await supabase.from("artworks").update({ available }).in("id", ids);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      await queryClient.invalidateQueries({ queryKey: ["artworks"] });
+      toast({ title: `${ids.length} artwork${ids.length === 1 ? "" : "s"} marked ${available ? "available" : "sold"}` });
+      setSelectedIds(new Set());
+    }
+  };
+
+  const handleBulkPrice = async (mode: "set" | "increase" | "decrease", value: number) => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    const targets = artworks.filter((a) => selectedIds.has(a.id));
+    const updates = targets.map((a) => {
+      let newPrice = a.price;
+      if (mode === "set") newPrice = Math.round(value);
+      else if (mode === "increase") newPrice = Math.round(a.price + value);
+      else newPrice = Math.max(0, Math.round(a.price - value));
+      return { id: a.id, price: newPrice };
+    });
+    const results = await Promise.all(
+      updates.map((u) => supabase.from("artworks").update({ price: u.price }).eq("id", u.id)),
+    );
+    const firstError = results.find((r) => r.error)?.error;
+    if (firstError) {
+      toast({ title: "Error", description: firstError.message, variant: "destructive" });
+    } else {
+      await queryClient.invalidateQueries({ queryKey: ["artworks"] });
+      const label = mode === "set" ? `set to Rs ${value.toLocaleString()}` : mode === "increase" ? `increased by Rs ${value.toLocaleString()}` : `decreased by Rs ${value.toLocaleString()}`;
+      toast({ title: `Prices ${label}`, description: `${ids.length} artwork${ids.length === 1 ? "" : "s"} updated` });
+      setSelectedIds(new Set());
+    }
+  };
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {[
         { key: "title", label: "Title", type: "text" },
