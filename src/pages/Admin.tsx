@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useArtworks, type Artwork } from "@/hooks/useArtworks";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Pencil, Trash2, ToggleLeft, ToggleRight, Save, X } from "lucide-react";
+import { Pencil, Trash2, ToggleLeft, ToggleRight, Save, X, ImageOff } from "lucide-react";
 import { AdminAuthGate } from "@/components/admin/AdminAuthGate";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import { AdminStats } from "@/components/admin/AdminStats";
+import { AdminToolbar, type AvailabilityFilter } from "@/components/admin/AdminToolbar";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 const emptyForm = {
@@ -26,11 +28,27 @@ const Admin = () => {
   const { data: artworks = [], isLoading } = useArtworks();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { signOut } = useAdminAuth();
+  const { signOut, user } = useAdminAuth();
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<AvailabilityFilter>("all");
+
+  const filteredArtworks = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return artworks.filter((a) => {
+      if (filter === "available" && !a.available) return false;
+      if (filter === "sold" && a.available) return false;
+      if (!q) return true;
+      return (
+        a.title.toLowerCase().includes(q) ||
+        (a.medium ?? "").toLowerCase().includes(q) ||
+        (a.category ?? "").toLowerCase().includes(q)
+      );
+    });
+  }, [artworks, search, filter]);
 
   const handleToggleAvailability = async (artwork: Artwork) => {
     const { error } = await supabase
@@ -46,7 +64,7 @@ const Admin = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this artwork?")) return;
+    if (!confirm("Are you sure you want to delete this artwork? This cannot be undone.")) return;
     const { error } = await supabase.from("artworks").delete().eq("id", id);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -176,11 +194,14 @@ const Admin = () => {
   );
 
   const adminContent = () => (
-    <div className="container mx-auto max-w-5xl w-full">
+    <div className="container mx-auto max-w-6xl w-full">
       <AdminHeader
+        adminEmail={user?.email ?? null}
         onAddArtwork={() => { setShowAddForm(true); setEditingId(null); setForm(emptyForm); }}
         onSignOut={() => void signOut()}
       />
+
+      <AdminStats artworks={artworks} />
 
       {showAddForm && (
         <div className="mb-8 p-6 border border-primary/30 bg-card">
@@ -197,13 +218,28 @@ const Admin = () => {
         </div>
       )}
 
+      <AdminToolbar
+        search={search}
+        onSearchChange={setSearch}
+        filter={filter}
+        onFilterChange={setFilter}
+        resultCount={filteredArtworks.length}
+      />
+
       {isLoading ? (
         <p className="font-body text-muted-foreground animate-pulse">Loading...</p>
+      ) : filteredArtworks.length === 0 ? (
+        <div className="border border-border bg-card p-12 text-center">
+          <ImageOff className="mx-auto mb-3 text-muted-foreground" size={32} />
+          <p className="font-body text-sm text-muted-foreground">
+            No artworks match your filters.
+          </p>
+        </div>
       ) : (
         <div className="space-y-4">
-          {artworks.map((artwork) => (
-            <div key={artwork.id} className="flex flex-col sm:flex-row gap-4 p-4 border border-border bg-card">
-              <img src={artwork.image} alt={artwork.title} className="w-20 h-24 object-cover flex-shrink-0" />
+          {filteredArtworks.map((artwork) => (
+            <div key={artwork.id} className="flex flex-col sm:flex-row gap-4 p-4 border border-border bg-card hover:border-primary/30 transition-colors">
+              <img src={artwork.image} alt={artwork.title} className="w-full sm:w-20 h-40 sm:h-24 object-cover flex-shrink-0" />
 
               {editingId === artwork.id ? (
                 <div className="flex-1">
@@ -220,11 +256,11 @@ const Admin = () => {
               ) : (
                 <>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-display text-lg text-foreground">{artwork.title}</h3>
+                    <h3 className="font-display text-lg text-foreground truncate">{artwork.title}</h3>
                     <p className="font-body text-sm text-muted-foreground">{artwork.medium} — {artwork.size} — {artwork.year}</p>
                     <p className="font-body text-sm text-primary mt-1">Rs {artwork.price.toLocaleString()}</p>
-                    <span className={`inline-block mt-1 font-body text-xs tracking-widest uppercase ${artwork.available ? "text-green-400" : "text-destructive"}`}>
-                      {artwork.available ? "Available" : "Sold"}
+                    <span className={`inline-block mt-1 font-body text-xs tracking-widest uppercase ${artwork.available ? "text-primary" : "text-destructive"}`}>
+                      {artwork.available ? "● Available" : "● Sold"}
                     </span>
                   </div>
                   <div className="flex sm:flex-col gap-2 flex-shrink-0">
@@ -248,9 +284,9 @@ const Admin = () => {
   );
 
   return (
-    <div className="min-h-screen bg-page">
+    <div className="min-h-screen bg-page flex flex-col">
       <Navbar />
-      <div className="pt-24 pb-16 px-6 md:px-12 flex items-center justify-center min-h-[80vh]">
+      <div className="flex-1 pt-24 pb-16 px-6 md:px-12 flex items-start justify-center">
         <AdminAuthGate onAuthenticated={adminContent} />
       </div>
       <Footer />

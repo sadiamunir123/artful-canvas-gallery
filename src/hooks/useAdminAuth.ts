@@ -1,11 +1,22 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 
 export const ADMIN_EMAIL = "iamsadiamunir@gmail.com";
 
+// Auto sign-out after 30 minutes of inactivity for security
+const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
+
 type AuthMode = "login" | "signup";
+
+export const validatePasswordStrength = (password: string): string | null => {
+  if (password.length < 8) return "Password must be at least 8 characters.";
+  if (!/[A-Z]/.test(password)) return "Password must contain an uppercase letter.";
+  if (!/[a-z]/.test(password)) return "Password must contain a lowercase letter.";
+  if (!/[0-9]/.test(password)) return "Password must contain a number.";
+  return null;
+};
 
 const supabaseRpc = supabase as typeof supabase & {
   rpc: (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
@@ -70,6 +81,29 @@ export const useAdminAuth = () => {
       listener.subscription.unsubscribe();
     };
   }, [syncAdminState]);
+
+  // Idle auto sign-out for admin security
+  const idleTimerRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!session) return;
+
+    const resetTimer = () => {
+      if (idleTimerRef.current) window.clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = window.setTimeout(() => {
+        void supabase.auth.signOut();
+        setAuthError("You have been signed out due to inactivity.");
+      }, IDLE_TIMEOUT_MS);
+    };
+
+    const events: (keyof WindowEventMap)[] = ["mousemove", "keydown", "click", "scroll", "touchstart"];
+    events.forEach((e) => window.addEventListener(e, resetTimer, { passive: true }));
+    resetTimer();
+
+    return () => {
+      events.forEach((e) => window.removeEventListener(e, resetTimer));
+      if (idleTimerRef.current) window.clearTimeout(idleTimerRef.current);
+    };
+  }, [session]);
 
   const signIn = useCallback(async (email: string, password: string) => {
     setIsSubmitting(true);
