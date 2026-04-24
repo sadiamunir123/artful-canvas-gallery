@@ -10,6 +10,7 @@ import { AdminAuthGate } from "@/components/admin/AdminAuthGate";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { AdminStats } from "@/components/admin/AdminStats";
 import { AdminToolbar, type AvailabilityFilter } from "@/components/admin/AdminToolbar";
+import { BulkActionBar } from "@/components/admin/BulkActionBar";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 const emptyForm = {
