@@ -36,6 +36,7 @@ const Admin = () => {
   const [form, setForm] = useState(emptyForm);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<AvailabilityFilter>("all");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const filteredArtworks = useMemo(() => {
     const q = search.trim().toLowerCase();
