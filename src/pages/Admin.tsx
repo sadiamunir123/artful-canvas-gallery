@@ -200,6 +200,8 @@ const Admin = () => {
       setSelectedIds(new Set());
     }
   };
+
+  const formFields = (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {[
         { key: "title", label: "Title", type: "text" },
