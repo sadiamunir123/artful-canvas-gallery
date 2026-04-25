@@ -8,8 +8,6 @@ export const ADMIN_EMAIL = "iamsadiamunir@gmail.com";
 // Auto sign-out after 30 minutes of inactivity for security
 const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
 
-type AuthMode = "login" | "signup";
-
 export const validatePasswordStrength = (password: string): string | null => {
   if (password.length < 8) return "Password must be at least 8 characters.";
   if (!/[A-Z]/.test(password)) return "Password must contain an uppercase letter.";
@@ -18,69 +16,50 @@ export const validatePasswordStrength = (password: string): string | null => {
   return null;
 };
 
+const isAdminEmail = (email: string | null | undefined): boolean =>
+  (email ?? "").trim().toLowerCase() === ADMIN_EMAIL;
+
+// Best-effort: ensures the user_roles row exists for RLS-protected writes.
+// Failure here does NOT block admin UI access — gate uses email check.
 const supabaseRpc = supabase as typeof supabase & {
-  rpc: (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
+  rpc: (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;
 };
 
 export const useAdminAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isReady, setIsReady] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [authMode, setAuthMode] = useState<AuthMode>("login");
   const [authError, setAuthError] = useState<string | null>(null);
 
-  const syncAdminState = useCallback(async (nextSession: Session | null) => {
-    setSession(nextSession);
+  const user = session?.user ?? null;
+  const isAdmin = isAdminEmail(user?.email);
 
-    if (!nextSession?.user) {
-      setIsAdmin(false);
-      setIsLoading(false);
-      return;
-    }
-
-    const { error: claimError } = await supabaseRpc.rpc("claim_admin_access");
-
-    if (claimError) {
-      setAuthError(claimError.message);
-      setIsAdmin(false);
-      setIsLoading(false);
-      return;
-    }
-
-    const { data, error } = await supabaseRpc.rpc("is_current_user_admin");
-
-    if (error) {
-      setAuthError(error.message);
-      setIsAdmin(false);
-    } else {
-      setIsAdmin(Boolean(data));
-    }
-
-    setIsLoading(false);
-  }, []);
-
+  // Single source of truth for session. Set up listener BEFORE getSession.
   useEffect(() => {
     let active = true;
 
-    const handleSession = async (nextSession: Session | null) => {
-      if (!active) return;
-      await syncAdminState(nextSession);
-    };
-
     const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      void handleSession(nextSession);
+      if (!active) return;
+      setSession(nextSession);
+      setIsReady(true);
+
+      // Best-effort role sync — never block UI on this.
+      if (nextSession?.user && isAdminEmail(nextSession.user.email)) {
+        void supabaseRpc.rpc("claim_admin_access").catch(() => undefined);
+      }
     });
 
     void supabase.auth.getSession().then(({ data }) => {
-      void handleSession(data.session);
+      if (!active) return;
+      setSession(data.session);
+      setIsReady(true);
     });
 
     return () => {
       active = false;
       listener.subscription.unsubscribe();
     };
-  }, [syncAdminState]);
+  }, []);
 
   // Idle auto sign-out for admin security
   const idleTimerRef = useRef<number | null>(null);
@@ -109,53 +88,19 @@ export const useAdminAuth = () => {
     setIsSubmitting(true);
     setAuthError(null);
 
-    if (email.trim().toLowerCase() !== ADMIN_EMAIL) {
+    if (!isAdminEmail(email)) {
       setIsSubmitting(false);
       setAuthError(`Only ${ADMIN_EMAIL} can access the admin panel.`);
       return false;
     }
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     setIsSubmitting(false);
 
     if (error) {
       setAuthError(error.message);
       return false;
     }
-
-    return true;
-  }, []);
-
-  const signUp = useCallback(async (email: string, password: string) => {
-    setIsSubmitting(true);
-    setAuthError(null);
-
-    if (email.trim().toLowerCase() !== ADMIN_EMAIL) {
-      setIsSubmitting(false);
-      setAuthError(`Only ${ADMIN_EMAIL} can be registered as the admin account.`);
-      return false;
-    }
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/admin`,
-      },
-    });
-
-    setIsSubmitting(false);
-
-    if (error) {
-      setAuthError(error.message);
-      return false;
-    }
-
-    if (!data.session) {
-      setAuthError("Check your email to verify the admin account, then sign in.");
-    }
-
     return true;
   }, []);
 
@@ -177,7 +122,6 @@ export const useAdminAuth = () => {
       setAuthError(result.error.message);
       return false;
     }
-
     return true;
   }, []);
 
@@ -185,13 +129,13 @@ export const useAdminAuth = () => {
     setIsSubmitting(true);
     setAuthError(null);
 
-    if (email.trim().toLowerCase() !== ADMIN_EMAIL) {
+    if (!isAdminEmail(email)) {
       setIsSubmitting(false);
       setAuthError(`Password reset is only available for ${ADMIN_EMAIL}.`);
       return false;
     }
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo: `${window.location.origin}/reset-password`,
     });
 
@@ -211,14 +155,12 @@ export const useAdminAuth = () => {
     setAuthError(null);
 
     const { error } = await supabase.auth.updateUser({ password });
-
     setIsSubmitting(false);
 
     if (error) {
       setAuthError(error.message);
       return false;
     }
-
     return true;
   }, []);
 
@@ -229,15 +171,12 @@ export const useAdminAuth = () => {
 
   return {
     session,
-    user: session?.user ?? null,
-    isLoading,
+    user,
+    isLoading: !isReady,
     isSubmitting,
     isAdmin,
-    authMode,
-    setAuthMode,
     authError,
     signIn,
-    signUp,
     signInWithGoogle,
     requestPasswordReset,
     updatePassword,
