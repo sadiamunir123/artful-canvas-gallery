@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import type { User } from "@supabase/supabase-js";
 import { Eye, EyeOff, Lock, LogIn, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { ADMIN_EMAIL, useAdminAuth } from "@/hooks/useAdminAuth";
 
 type AdminAuthGateProps = {
-  onAuthenticated: () => ReactNode;
+  onAuthenticated: (session: { user: User; signOut: () => Promise<void> }) => ReactNode;
 };
 
 export const AdminAuthGate = ({ onAuthenticated }: AdminAuthGateProps) => {
@@ -47,7 +48,7 @@ export const AdminAuthGate = ({ onAuthenticated }: AdminAuthGateProps) => {
   }
 
   if (user && isAdmin) {
-    return <>{onAuthenticated()}</>;
+    return <>{onAuthenticated({ user, signOut })}</>;
   }
 
   if (user && !isAdmin) {
