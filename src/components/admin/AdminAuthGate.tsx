@@ -32,10 +32,7 @@ export const AdminAuthGate = ({ onAuthenticated }: AdminAuthGateProps) => {
       await requestPasswordReset(form.email);
       return;
     }
-    const success = await signIn(form.email, form.password);
-    if (success && window.location.pathname !== "/admin") {
-      window.history.replaceState(null, "", "/admin");
-    }
+    await signIn(form.email, form.password);
   };
 
   if (isLoading) {
