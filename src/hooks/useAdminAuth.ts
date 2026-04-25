@@ -45,7 +45,7 @@ export const useAdminAuth = () => {
 
       // Best-effort role sync — never block UI on this.
       if (nextSession?.user && isAdminEmail(nextSession.user.email)) {
-        void supabaseRpc.rpc("claim_admin_access").catch(() => undefined);
+        Promise.resolve(supabaseRpc.rpc("claim_admin_access")).catch(() => undefined);
       }
     });
 
