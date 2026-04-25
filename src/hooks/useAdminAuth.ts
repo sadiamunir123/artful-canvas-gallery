@@ -4,6 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 
 export const ADMIN_EMAIL = "iamsadiamunir@gmail.com";
+const ADMIN_PATH = "/admin";
+
+const normalizeEmail = (email: string | null | undefined): string => (email ?? "").trim().toLowerCase();
 
 export const validatePasswordStrength = (password: string): string | null => {
   if (password.length < 8) return "Password must be at least 8 characters.";
@@ -14,7 +17,7 @@ export const validatePasswordStrength = (password: string): string | null => {
 };
 
 const isAdminEmail = (email: string | null | undefined): boolean =>
-  (email ?? "").trim().toLowerCase() === ADMIN_EMAIL;
+  normalizeEmail(email) === ADMIN_EMAIL;
 
 export const useAdminAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -62,7 +65,7 @@ export const useAdminAuth = () => {
       return false;
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email: normalizeEmail(email), password });
     setIsSubmitting(false);
 
     if (error) {
@@ -76,6 +79,9 @@ export const useAdminAuth = () => {
       return false;
     }
 
+    setSession(data.session);
+    window.history.replaceState(null, "", ADMIN_PATH);
+
     return true;
   }, []);
 
@@ -84,7 +90,7 @@ export const useAdminAuth = () => {
     setAuthError(null);
 
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/admin`,
+      redirect_uri: `${window.location.origin}${ADMIN_PATH}`,
       extraParams: {
         login_hint: ADMIN_EMAIL,
         prompt: "select_account",
@@ -97,6 +103,8 @@ export const useAdminAuth = () => {
       setAuthError(result.error.message);
       return false;
     }
+
+    window.history.replaceState(null, "", ADMIN_PATH);
     return true;
   }, []);
 
@@ -142,6 +150,7 @@ export const useAdminAuth = () => {
   const signOut = useCallback(async () => {
     setAuthError(null);
     await supabase.auth.signOut();
+    setSession(null);
   }, []);
 
   return {
