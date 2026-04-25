@@ -15,6 +15,20 @@ import Admin from "./pages/Admin.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
+const ADMIN_AUTH_REDIRECT_KEY = "haqarts.admin.redirect";
+
+const restoreAdminOAuthRoute = () => {
+  if (typeof window === "undefined") return;
+
+  const pendingPath = window.localStorage.getItem(ADMIN_AUTH_REDIRECT_KEY);
+  if (pendingPath === "/admin" && window.location.pathname === "/") {
+    window.localStorage.removeItem(ADMIN_AUTH_REDIRECT_KEY);
+    window.history.replaceState(null, "", "/admin");
+  }
+};
+
+restoreAdminOAuthRoute();
+
 const queryClient = new QueryClient();
 
 const App = () => (
