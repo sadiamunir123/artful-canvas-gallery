@@ -20,9 +20,19 @@ const ADMIN_AUTH_REDIRECT_KEY = "haqarts.admin.redirect";
 const restoreAdminOAuthRoute = () => {
   if (typeof window === "undefined") return;
 
-  const pendingPath = window.localStorage.getItem(ADMIN_AUTH_REDIRECT_KEY);
-  if (pendingPath === "/admin" && window.location.pathname === "/") {
+  const pendingPath =
+    window.localStorage.getItem(ADMIN_AUTH_REDIRECT_KEY) ??
+    window.sessionStorage.getItem(ADMIN_AUTH_REDIRECT_KEY);
+
+  const isOAuthReturn =
+    window.location.pathname === "/" ||
+    window.location.pathname.startsWith("/~oauth") ||
+    window.location.search.includes("code=") ||
+    window.location.hash.includes("access_token=");
+
+  if (pendingPath === "/admin" && isOAuthReturn) {
     window.localStorage.removeItem(ADMIN_AUTH_REDIRECT_KEY);
+    window.sessionStorage.removeItem(ADMIN_AUTH_REDIRECT_KEY);
     window.history.replaceState(null, "", "/admin");
   }
 };
