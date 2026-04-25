@@ -5,6 +5,7 @@ import { lovable } from "@/integrations/lovable";
 
 export const ADMIN_EMAIL = "iamsadiamunir@gmail.com";
 const ADMIN_PATH = "/admin";
+export const ADMIN_AUTH_REDIRECT_KEY = "haqarts.admin.redirect";
 
 const normalizeEmail = (email: string | null | undefined): string => (email ?? "").trim().toLowerCase();
 
@@ -89,8 +90,10 @@ export const useAdminAuth = () => {
     setIsSubmitting(true);
     setAuthError(null);
 
+    window.localStorage.setItem(ADMIN_AUTH_REDIRECT_KEY, ADMIN_PATH);
+
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}${ADMIN_PATH}`,
+      redirect_uri: window.location.origin,
       extraParams: {
         login_hint: ADMIN_EMAIL,
         prompt: "select_account",
@@ -100,6 +103,7 @@ export const useAdminAuth = () => {
     setIsSubmitting(false);
 
     if (result.error) {
+      window.localStorage.removeItem(ADMIN_AUTH_REDIRECT_KEY);
       setAuthError(result.error.message);
       return false;
     }
