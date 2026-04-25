@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import type { User } from "@supabase/supabase-js";
 import { Eye, EyeOff, Lock, LogIn, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { ADMIN_EMAIL, useAdminAuth } from "@/hooks/useAdminAuth";
 
 type AdminAuthGateProps = {
-  onAuthenticated: () => ReactNode;
+  onAuthenticated: (session: { user: User; signOut: () => Promise<void> }) => ReactNode;
 };
 
 export const AdminAuthGate = ({ onAuthenticated }: AdminAuthGateProps) => {
@@ -31,7 +32,10 @@ export const AdminAuthGate = ({ onAuthenticated }: AdminAuthGateProps) => {
       await requestPasswordReset(form.email);
       return;
     }
-    await signIn(form.email, form.password);
+    const success = await signIn(form.email, form.password);
+    if (success && window.location.pathname !== "/admin") {
+      window.history.replaceState(null, "", "/admin");
+    }
   };
 
   if (isLoading) {
@@ -44,7 +48,7 @@ export const AdminAuthGate = ({ onAuthenticated }: AdminAuthGateProps) => {
   }
 
   if (user && isAdmin) {
-    return <>{onAuthenticated()}</>;
+    return <>{onAuthenticated({ user, signOut })}</>;
   }
 
   if (user && !isAdmin) {
@@ -180,7 +184,7 @@ export const AdminAuthGate = ({ onAuthenticated }: AdminAuthGateProps) => {
       </button>
 
       <p className="text-center font-body text-[11px] tracking-widest uppercase text-muted-foreground/70">
-        🔒 Secured connection · Auto sign-out after 30 min
+        🔒 Secured session · Admin email only
       </p>
     </form>
   );

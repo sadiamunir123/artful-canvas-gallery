@@ -11,7 +11,6 @@ import { AdminHeader } from "@/components/admin/AdminHeader";
 import { AdminStats } from "@/components/admin/AdminStats";
 import { AdminToolbar, type AvailabilityFilter } from "@/components/admin/AdminToolbar";
 import { BulkActionBar } from "@/components/admin/BulkActionBar";
-import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 const emptyForm = {
   title: "",
@@ -29,7 +28,6 @@ const Admin = () => {
   const { data: artworks = [], isLoading } = useArtworks();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { signOut, user } = useAdminAuth();
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -256,7 +254,7 @@ const Admin = () => {
     </div>
   );
 
-  const adminContent = () => (
+  const adminContent = ({ user, signOut }: { user: { email?: string | null }; signOut: () => Promise<void> }) => (
     <div className="container mx-auto max-w-6xl w-full">
       <AdminHeader
         adminEmail={user?.email ?? null}
