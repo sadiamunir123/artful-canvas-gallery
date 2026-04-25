@@ -31,7 +31,10 @@ export const AdminAuthGate = ({ onAuthenticated }: AdminAuthGateProps) => {
       await requestPasswordReset(form.email);
       return;
     }
-    await signIn(form.email, form.password);
+    const success = await signIn(form.email, form.password);
+    if (success && window.location.pathname !== "/admin") {
+      window.history.replaceState(null, "", "/admin");
+    }
   };
 
   if (isLoading) {
@@ -180,7 +183,7 @@ export const AdminAuthGate = ({ onAuthenticated }: AdminAuthGateProps) => {
       </button>
 
       <p className="text-center font-body text-[11px] tracking-widest uppercase text-muted-foreground/70">
-        🔒 Secured connection · Auto sign-out after 30 min
+        🔒 Secured session · Admin email only
       </p>
     </form>
   );
