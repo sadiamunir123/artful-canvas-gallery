@@ -6,7 +6,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
-import { ADMIN_EMAIL, ADMIN_LOGIN_PARAM, ADMIN_REDIRECT_STORAGE_KEY, clearAdminRedirect } from "@/hooks/useAdminAuth";
+import {
+  ADMIN_AUTH_ERROR_PARAM,
+  ADMIN_EMAIL,
+  ADMIN_LOGIN_PARAM,
+  ADMIN_REDIRECT_STORAGE_KEY,
+  clearAdminRedirect,
+} from "@/hooks/useAdminAuth";
 import Index from "./pages/Index.tsx";
 import Paintings from "./pages/Paintings.tsx";
 import Artist from "./pages/Artist.tsx";
@@ -20,14 +26,37 @@ import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
 
-const hasPendingAdminLogin = (search: string, hash: string) => {
+const ADMIN_PATH = "/admin";
+
+const getAdminOAuthError = (search: string, hash: string) => {
   const params = new URLSearchParams(search);
-  if (params.has(ADMIN_LOGIN_PARAM) || hash.includes("access_token") || hash.includes("refresh_token")) return true;
+  const hashParams = new URLSearchParams(hash.startsWith("#") ? hash.slice(1) : hash);
+  return (
+    params.get("error_description") ??
+    params.get("error") ??
+    hashParams.get("error_description") ??
+    hashParams.get("error")
+  );
+};
+
+const isAdminOAuthReturn = (search: string, hash: string) => {
+  const params = new URLSearchParams(search);
+  const hashParams = new URLSearchParams(hash.startsWith("#") ? hash.slice(1) : hash);
+  if (
+    params.has(ADMIN_LOGIN_PARAM) ||
+    params.has("code") ||
+    params.has("error") ||
+    hashParams.has("access_token") ||
+    hashParams.has("refresh_token") ||
+    hashParams.has("error")
+  ) {
+    return true;
+  }
 
   try {
     return (
-      window.localStorage.getItem(ADMIN_REDIRECT_STORAGE_KEY) === "/admin" ||
-      window.sessionStorage.getItem(ADMIN_REDIRECT_STORAGE_KEY) === "/admin"
+      window.localStorage.getItem(ADMIN_REDIRECT_STORAGE_KEY) === ADMIN_PATH ||
+      window.sessionStorage.getItem(ADMIN_REDIRECT_STORAGE_KEY) === ADMIN_PATH
     );
   } catch {
     return false;
@@ -39,13 +68,21 @@ const AdminLoginRedirect = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (location.pathname !== "/" || !hasPendingAdminLogin(location.search, location.hash)) return;
+    const isReturnPath = location.pathname === "/" || location.pathname === ADMIN_PATH;
+    if (!isReturnPath || !isAdminOAuthReturn(location.search, location.hash)) return;
+
+    const oauthError = getAdminOAuthError(location.search, location.hash);
+    if (oauthError) {
+      clearAdminRedirect();
+      navigate(`${ADMIN_PATH}?${ADMIN_AUTH_ERROR_PARAM}=${encodeURIComponent(oauthError)}`, { replace: true });
+      return;
+    }
 
     let active = true;
     const sendAdminHome = (email?: string | null) => {
       if (!active || (email ?? "").trim().toLowerCase() !== ADMIN_EMAIL) return;
       clearAdminRedirect();
-      navigate("/admin", { replace: true });
+      navigate(ADMIN_PATH, { replace: true });
     };
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
