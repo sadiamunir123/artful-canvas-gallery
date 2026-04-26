@@ -27,6 +27,24 @@ import NotFound from "./pages/NotFound.tsx";
 const queryClient = new QueryClient();
 
 const ADMIN_PATH = "/admin";
+const LOVABLE_OAUTH_ORIGIN = "https://oauth.lovable.app";
+const ADMIN_SESSION_CHECK_DELAY_MS = 250;
+const MAX_ADMIN_SESSION_CHECKS = 20;
+
+const OAuthBrokerRedirect = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    const brokerPath = location.pathname.replace(/^\/\~oauth/, "") || "/initiate";
+    window.location.replace(`${LOVABLE_OAUTH_ORIGIN}${brokerPath}${location.search}`);
+  }, [location.pathname, location.search]);
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-page px-6 text-center">
+      <p className="font-body text-sm text-muted-foreground animate-pulse">Opening secure Google sign-in...</p>
+    </div>
+  );
+};
 
 const getAdminOAuthError = (search: string, hash: string) => {
   const params = new URLSearchParams(search);
@@ -79,22 +97,45 @@ const AdminLoginRedirect = () => {
     }
 
     let active = true;
+    let checks = 0;
+    let retryTimer: ReturnType<typeof window.setTimeout> | undefined;
+
     const sendAdminHome = (email?: string | null) => {
-      if (!active || (email ?? "").trim().toLowerCase() !== ADMIN_EMAIL) return;
+      if (!active || (email ?? "").trim().toLowerCase() !== ADMIN_EMAIL) return false;
       clearAdminRedirect();
       navigate(ADMIN_PATH, { replace: true });
+      return true;
     };
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       sendAdminHome(session?.user.email);
     });
 
-    void supabase.auth.getSession().then(({ data }) => {
-      sendAdminHome(data.session?.user.email);
-    });
+    const checkSession = () => {
+      checks += 1;
+      void supabase.auth.getSession().then(({ data }) => {
+        if (sendAdminHome(data.session?.user.email) || !active) return;
+
+        if (checks < MAX_ADMIN_SESSION_CHECKS) {
+          retryTimer = window.setTimeout(checkSession, ADMIN_SESSION_CHECK_DELAY_MS);
+          return;
+        }
+
+        clearAdminRedirect();
+        navigate(
+          `${ADMIN_PATH}?${ADMIN_AUTH_ERROR_PARAM}=${encodeURIComponent(
+            "Admin login did not complete. Please try Google sign-in again.",
+          )}`,
+          { replace: true },
+        );
+      });
+    };
+
+    checkSession();
 
     return () => {
       active = false;
+      if (retryTimer) window.clearTimeout(retryTimer);
       listener.subscription.unsubscribe();
     };
   }, [location.hash, location.pathname, location.search, navigate]);
@@ -111,6 +152,7 @@ const App = () => (
         <BrowserRouter>
           <AdminLoginRedirect />
           <Routes>
+            <Route path="/~oauth/*" element={<OAuthBrokerRedirect />} />
             <Route path="/" element={<Index />} />
             <Route path="/paintings" element={<Paintings />} />
             <Route path="/artist" element={<Artist />} />
