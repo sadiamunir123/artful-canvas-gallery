@@ -98,7 +98,7 @@ const AdminLoginRedirect = () => {
 
     let active = true;
     let checks = 0;
-    let retryTimer: ReturnType<typeof window.setTimeout> | undefined;
+    let retryTimer: number | undefined;
 
     const sendAdminHome = (email?: string | null) => {
       if (!active || (email ?? "").trim().toLowerCase() !== ADMIN_EMAIL) return false;
