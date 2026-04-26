@@ -5,6 +5,8 @@ import { lovable } from "@/integrations/lovable";
 
 export const ADMIN_EMAIL = "iamsadiamunir@gmail.com";
 const ADMIN_PATH = "/admin";
+export const ADMIN_LOGIN_PARAM = "admin_login";
+export const ADMIN_REDIRECT_STORAGE_KEY = "haq_admin_redirect";
 
 const normalizeEmail = (email: string | null | undefined): string => (email ?? "").trim().toLowerCase();
 
@@ -18,6 +20,24 @@ export const validatePasswordStrength = (password: string): string | null => {
 
 const isAdminEmail = (email: string | null | undefined): boolean =>
   normalizeEmail(email) === ADMIN_EMAIL;
+
+const rememberAdminRedirect = () => {
+  try {
+    window.localStorage.setItem(ADMIN_REDIRECT_STORAGE_KEY, ADMIN_PATH);
+    window.sessionStorage.setItem(ADMIN_REDIRECT_STORAGE_KEY, ADMIN_PATH);
+  } catch {
+    // Storage can be unavailable in strict/private browsers; the URL marker still handles redirects.
+  }
+};
+
+export const clearAdminRedirect = () => {
+  try {
+    window.localStorage.removeItem(ADMIN_REDIRECT_STORAGE_KEY);
+    window.sessionStorage.removeItem(ADMIN_REDIRECT_STORAGE_KEY);
+  } catch {
+    // Ignore storage restrictions.
+  }
+};
 
 export const useAdminAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -58,6 +78,7 @@ export const useAdminAuth = () => {
   const signIn = useCallback(async (email: string, password: string) => {
     setIsSubmitting(true);
     setAuthError(null);
+    rememberAdminRedirect();
 
     if (!isAdminEmail(email)) {
       setIsSubmitting(false);
@@ -81,6 +102,7 @@ export const useAdminAuth = () => {
 
     setSession(data.session);
     window.history.replaceState(null, "", ADMIN_PATH);
+    clearAdminRedirect();
 
     return true;
   }, []);
@@ -88,9 +110,13 @@ export const useAdminAuth = () => {
   const signInWithGoogle = useCallback(async () => {
     setIsSubmitting(true);
     setAuthError(null);
+    rememberAdminRedirect();
+
+    const redirectUrl = new URL(window.location.origin);
+    redirectUrl.searchParams.set(ADMIN_LOGIN_PARAM, "1");
 
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}${ADMIN_PATH}`,
+      redirect_uri: redirectUrl.toString(),
       extraParams: {
         login_hint: ADMIN_EMAIL,
         prompt: "select_account",
@@ -100,6 +126,7 @@ export const useAdminAuth = () => {
     setIsSubmitting(false);
 
     if (result.error) {
+      clearAdminRedirect();
       setAuthError(result.error.message);
       return false;
     }
@@ -111,6 +138,7 @@ export const useAdminAuth = () => {
     const { data } = await supabase.auth.getSession();
     setSession(data.session);
     window.history.replaceState(null, "", ADMIN_PATH);
+    clearAdminRedirect();
     return true;
   }, []);
 
