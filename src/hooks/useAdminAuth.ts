@@ -6,9 +6,18 @@ import { lovable } from "@/integrations/lovable";
 export const ADMIN_EMAIL = "iamsadiamunir@gmail.com";
 const ADMIN_PATH = "/admin";
 export const ADMIN_LOGIN_PARAM = "admin_login";
+export const ADMIN_AUTH_ERROR_PARAM = "admin_error";
 export const ADMIN_REDIRECT_STORAGE_KEY = "haq_admin_redirect";
 
 const normalizeEmail = (email: string | null | undefined): string => (email ?? "").trim().toLowerCase();
+
+const readAdminAuthError = (): string | null => {
+  if (typeof window === "undefined") return null;
+
+  const params = new URLSearchParams(window.location.search);
+  const message = params.get(ADMIN_AUTH_ERROR_PARAM) ?? params.get("error_description") ?? params.get("error");
+  return message ? decodeURIComponent(message.replace(/\+/g, " ")) : null;
+};
 
 export const validatePasswordStrength = (password: string): string | null => {
   if (password.length < 8) return "Password must be at least 8 characters.";
@@ -43,7 +52,7 @@ export const useAdminAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(() => readAdminAuthError());
 
   const user = session?.user ?? null;
   const isAdmin = isAdminEmail(user?.email);
@@ -127,7 +136,7 @@ export const useAdminAuth = () => {
 
     if (result.error) {
       clearAdminRedirect();
-      setAuthError(result.error.message);
+      setAuthError(`Google sign-in failed: ${result.error.message}`);
       return false;
     }
 
@@ -137,6 +146,13 @@ export const useAdminAuth = () => {
 
     const { data } = await supabase.auth.getSession();
     setSession(data.session);
+
+    if (!isAdminEmail(data.session?.user.email)) {
+      clearAdminRedirect();
+      setAuthError(`Only ${ADMIN_EMAIL} can access the admin panel.`);
+      return false;
+    }
+
     window.history.replaceState(null, "", ADMIN_PATH);
     clearAdminRedirect();
     return true;
