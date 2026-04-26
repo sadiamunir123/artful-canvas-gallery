@@ -207,6 +207,38 @@ export const useAdminAuth = () => {
     setAuthError(null);
     rememberAdminRedirect();
 
+    if (isLocalBrowser()) {
+      const tokens = await signInWithLocalGooglePopup().catch((error: Error) => {
+        clearAdminRedirect();
+        setIsSubmitting(false);
+        setAuthError(`Google sign-in failed: ${error.message}`);
+        return null;
+      });
+
+      if (!tokens) return false;
+
+      const { data, error } = await supabase.auth.setSession(tokens);
+      setIsSubmitting(false);
+
+      if (error) {
+        clearAdminRedirect();
+        setAuthError(`Google sign-in failed: ${error.message}`);
+        return false;
+      }
+
+      if (!isAdminEmail(data.session?.user.email)) {
+        await supabase.auth.signOut();
+        clearAdminRedirect();
+        setAuthError(`Only ${ADMIN_EMAIL} can access the admin panel.`);
+        return false;
+      }
+
+      setSession(data.session);
+      window.history.replaceState(null, "", ADMIN_PATH);
+      clearAdminRedirect();
+      return true;
+    }
+
     const redirectUrl = new URL(window.location.origin);
     redirectUrl.searchParams.set(ADMIN_LOGIN_PARAM, "1");
 
