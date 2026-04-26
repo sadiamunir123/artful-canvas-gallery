@@ -5,27 +5,8 @@ import { lovable } from "@/integrations/lovable";
 
 export const ADMIN_EMAIL = "iamsadiamunir@gmail.com";
 const ADMIN_PATH = "/admin";
-export const ADMIN_AUTH_REDIRECT_KEY = "haqarts.admin.redirect";
 
 const normalizeEmail = (email: string | null | undefined): string => (email ?? "").trim().toLowerCase();
-
-const rememberAdminRedirect = () => {
-  try {
-    window.localStorage.setItem(ADMIN_AUTH_REDIRECT_KEY, ADMIN_PATH);
-    window.sessionStorage.setItem(ADMIN_AUTH_REDIRECT_KEY, ADMIN_PATH);
-  } catch {
-    // Some private browsers can block storage; OAuth can still continue.
-  }
-};
-
-const clearAdminRedirect = () => {
-  try {
-    window.localStorage.removeItem(ADMIN_AUTH_REDIRECT_KEY);
-    window.sessionStorage.removeItem(ADMIN_AUTH_REDIRECT_KEY);
-  } catch {
-    // Ignore storage cleanup failures in restricted browsers.
-  }
-};
 
 export const validatePasswordStrength = (password: string): string | null => {
   if (password.length < 8) return "Password must be at least 8 characters.";
@@ -108,10 +89,8 @@ export const useAdminAuth = () => {
     setIsSubmitting(true);
     setAuthError(null);
 
-    rememberAdminRedirect();
-
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: `${window.location.origin}${ADMIN_PATH}`,
       extraParams: {
         login_hint: ADMIN_EMAIL,
         prompt: "select_account",
@@ -121,7 +100,6 @@ export const useAdminAuth = () => {
     setIsSubmitting(false);
 
     if (result.error) {
-      clearAdminRedirect();
       setAuthError(result.error.message);
       return false;
     }
@@ -130,7 +108,8 @@ export const useAdminAuth = () => {
       return true;
     }
 
-    clearAdminRedirect();
+    const { data } = await supabase.auth.getSession();
+    setSession(data.session);
     window.history.replaceState(null, "", ADMIN_PATH);
     return true;
   }, []);
