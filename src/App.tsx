@@ -28,6 +28,7 @@ const queryClient = new QueryClient();
 
 const ADMIN_PATH = "/admin";
 const LOVABLE_OAUTH_ORIGIN = "https://oauth.lovable.app";
+const LOVABLE_PROJECT_ID = "271daa9e-a0d1-4284-8864-d8601052c602";
 const ADMIN_SESSION_CHECK_DELAY_MS = 250;
 const MAX_ADMIN_SESSION_CHECKS = 20;
 
@@ -36,7 +37,9 @@ const OAuthBrokerRedirect = () => {
 
   useEffect(() => {
     const brokerPath = location.pathname.replace(/^\/\~oauth/, "") || "/initiate";
-    window.location.replace(`${LOVABLE_OAUTH_ORIGIN}${brokerPath}${location.search}`);
+    const params = new URLSearchParams(location.search);
+    params.set("project_id", LOVABLE_PROJECT_ID);
+    window.location.replace(`${LOVABLE_OAUTH_ORIGIN}${brokerPath}?${params.toString()}`);
   }, [location.pathname, location.search]);
 
   return (
