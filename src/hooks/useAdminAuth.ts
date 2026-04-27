@@ -84,7 +84,8 @@ const signInWithLocalGooglePopup = () =>
 
       const payload = event.data as { type?: string; response?: Record<string, string | undefined> } | Record<string, string | undefined> | null;
       if (!payload || typeof payload !== "object") return;
-      const response: Record<string, string | undefined> = "response" in payload ? payload.response ?? {} : payload;
+      const maybeWrappedResponse = (payload as { response?: Record<string, string | undefined> }).response;
+      const response: Record<string, string | undefined> = maybeWrappedResponse ?? (payload as Record<string, string | undefined>);
       if ("type" in payload && payload.type && payload.type !== "authorization_response") return;
 
       if (response.state !== state) {
@@ -207,6 +208,38 @@ export const useAdminAuth = () => {
     setIsSubmitting(true);
     setAuthError(null);
     rememberAdminRedirect();
+
+    if (isLocalBrowser()) {
+      const tokens = await signInWithLocalGooglePopup().catch((error: Error) => {
+        clearAdminRedirect();
+        setIsSubmitting(false);
+        setAuthError(`Google sign-in failed: ${error.message}`);
+        return null;
+      });
+
+      if (!tokens) return false;
+
+      const { data, error } = await supabase.auth.setSession(tokens);
+      setIsSubmitting(false);
+
+      if (error) {
+        clearAdminRedirect();
+        setAuthError(`Google sign-in failed: ${error.message}`);
+        return false;
+      }
+
+      if (!isAdminEmail(data.session?.user.email)) {
+        await supabase.auth.signOut();
+        clearAdminRedirect();
+        setAuthError(`Only ${ADMIN_EMAIL} can access the admin panel.`);
+        return false;
+      }
+
+      setSession(data.session);
+      window.history.replaceState(null, "", ADMIN_PATH);
+      clearAdminRedirect();
+      return true;
+    }
 
     const redirectUrl = new URL(isLocalBrowser() ? ADMIN_PATH : "/", window.location.origin);
     redirectUrl.searchParams.set(ADMIN_LOGIN_PARAM, "1");
