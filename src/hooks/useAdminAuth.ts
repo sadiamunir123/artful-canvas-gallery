@@ -84,7 +84,7 @@ const signInWithLocalGooglePopup = () =>
 
       const payload = event.data as { type?: string; response?: Record<string, string | undefined> } | Record<string, string | undefined> | null;
       if (!payload || typeof payload !== "object") return;
-      const response = "response" in payload ? payload.response ?? {} : payload;
+      const response: Record<string, string | undefined> = "response" in payload ? payload.response ?? {} : payload;
       if ("type" in payload && payload.type && payload.type !== "authorization_response") return;
 
       if (response.state !== state) {
