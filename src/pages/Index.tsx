@@ -45,14 +45,19 @@ const Index = () => {
             i === current ? "opacity-100" : "opacity-0"
           }`}
         >
-          <div className="absolute inset-0 animate-kenburns">
+          <div
+            className="absolute inset-0 bg-center bg-no-repeat blur-2xl scale-110 opacity-40"
+            style={{ backgroundImage: `url(${artwork.image})`, backgroundSize: "cover" }}
+            aria-hidden
+          />
+          <div className="absolute inset-0 flex items-center justify-center p-6 md:p-12">
             <img
               src={artwork.image}
               alt={artwork.title}
-              className="w-full h-full object-cover"
+              className="max-w-full max-h-full object-contain shadow-2xl transition-transform duration-[6000ms] ease-out"
             />
           </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-background/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-background/20 pointer-events-none" />
         </div>
       ))}
 
