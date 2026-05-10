@@ -6,6 +6,7 @@ import ArtworkZoom from "@/components/ArtworkZoom";
 
 const Index = () => {
   const [current, setCurrent] = useState(0);
+  const [zoomOpen, setZoomOpen] = useState(false);
   const { data: slides = [] } = useArtworks();
 
   const next = useCallback(() => {
