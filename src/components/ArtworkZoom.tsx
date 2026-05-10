@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { X, ZoomIn, ZoomOut, Maximize } from "lucide-react";
 
 interface ArtworkZoomProps {
@@ -26,6 +26,17 @@ const ArtworkZoom = ({ image, title, onClose }: ArtworkZoomProps) => {
     setScale(1);
     setPosition({ x: 0, y: 0 });
   }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      else if (e.key === "+" || e.key === "=") zoomIn();
+      else if (e.key === "-" || e.key === "_") zoomOut();
+      else if (e.key === "0") resetZoom();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose, zoomIn, zoomOut, resetZoom]);
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
