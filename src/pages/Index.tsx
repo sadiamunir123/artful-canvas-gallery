@@ -55,7 +55,8 @@ const Index = () => {
           <img
             src={artwork.image}
             alt={artwork.title}
-            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+            onClick={() => i === current && setZoomOpen(true)}
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 cursor-zoom-in"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-background/20 pointer-events-none" />
         </div>
