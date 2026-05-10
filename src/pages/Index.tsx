@@ -50,11 +50,12 @@ const Index = () => {
             style={{ backgroundImage: `url(${artwork.image})`, backgroundSize: "cover" }}
             aria-hidden
           />
-          <div className="absolute inset-0 flex items-center justify-center p-2 md:p-4">
+          <div className="absolute inset-0 flex items-center justify-center">
             <img
               src={artwork.image}
               alt={artwork.title}
-              className="w-full h-full object-contain shadow-2xl transition-opacity duration-1000"
+              className="max-w-screen max-h-screen w-auto h-auto object-contain transition-opacity duration-1000"
+              style={{ maxWidth: "100vw", maxHeight: "100vh" }}
             />
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-background/20 pointer-events-none" />
