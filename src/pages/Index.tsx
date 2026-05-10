@@ -20,10 +20,10 @@ const Index = () => {
   }, [slides.length]);
 
   useEffect(() => {
-    if (slides.length === 0) return;
+    if (slides.length === 0 || zoomOpen) return;
     const timer = setInterval(next, 6000);
     return () => clearInterval(timer);
-  }, [next, slides.length]);
+  }, [next, slides.length, zoomOpen]);
 
   if (slides.length === 0) {
     return (
