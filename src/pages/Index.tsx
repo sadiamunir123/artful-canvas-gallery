@@ -81,10 +81,20 @@ const Index = () => {
         <button onClick={next} className="p-2 border border-foreground/20 text-foreground/60 hover:text-primary hover:border-primary transition-colors">
           <ChevronRight size={20} />
         </button>
+        <button onClick={() => setZoomOpen(true)} title="View full painting" className="p-2 border border-foreground/20 text-foreground/60 hover:text-primary hover:border-primary transition-colors">
+          <Maximize2 size={18} />
+        </button>
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 brand-line" />
-    </div>
+
+      {zoomOpen && slides[current] && (
+        <ArtworkZoom
+          image={slides[current].image}
+          title={slides[current].title}
+          onClose={() => setZoomOpen(false)}
+        />
+      )}
   );
 };
 
