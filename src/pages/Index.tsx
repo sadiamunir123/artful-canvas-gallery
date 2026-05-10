@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
 import { useArtworks } from "@/hooks/useArtworks";
 import Navbar from "@/components/Navbar";
+import ArtworkZoom from "@/components/ArtworkZoom";
 
 const Index = () => {
   const [current, setCurrent] = useState(0);
+  const [zoomOpen, setZoomOpen] = useState(false);
   const { data: slides = [] } = useArtworks();
 
   const next = useCallback(() => {
@@ -18,10 +20,10 @@ const Index = () => {
   }, [slides.length]);
 
   useEffect(() => {
-    if (slides.length === 0) return;
+    if (slides.length === 0 || zoomOpen) return;
     const timer = setInterval(next, 6000);
     return () => clearInterval(timer);
-  }, [next, slides.length]);
+  }, [next, slides.length, zoomOpen]);
 
   if (slides.length === 0) {
     return (
@@ -53,7 +55,8 @@ const Index = () => {
           <img
             src={artwork.image}
             alt={artwork.title}
-            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+            onClick={() => i === current && setZoomOpen(true)}
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 cursor-zoom-in"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-background/20 pointer-events-none" />
         </div>
@@ -78,9 +81,20 @@ const Index = () => {
         <button onClick={next} className="p-2 border border-foreground/20 text-foreground/60 hover:text-primary hover:border-primary transition-colors">
           <ChevronRight size={20} />
         </button>
+        <button onClick={() => setZoomOpen(true)} title="View full painting" className="p-2 border border-foreground/20 text-foreground/60 hover:text-primary hover:border-primary transition-colors">
+          <Maximize2 size={18} />
+        </button>
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 brand-line" />
+
+      {zoomOpen && slides[current] && (
+        <ArtworkZoom
+          image={slides[current].image}
+          title={slides[current].title}
+          onClose={() => setZoomOpen(false)}
+        />
+      )}
     </div>
   );
 };
