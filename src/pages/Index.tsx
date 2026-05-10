@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
 import { useArtworks } from "@/hooks/useArtworks";
 import Navbar from "@/components/Navbar";
+import ArtworkZoom from "@/components/ArtworkZoom";
 
 const Index = () => {
   const [current, setCurrent] = useState(0);
