@@ -95,6 +95,7 @@ const Index = () => {
           onClose={() => setZoomOpen(false)}
         />
       )}
+    </div>
   );
 };
 
