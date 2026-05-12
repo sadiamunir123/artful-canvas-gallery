@@ -45,7 +45,7 @@ const Index = () => {
 
   if (slides.length === 0) {
     return (
-      <div className="relative h-screen w-full overflow-hidden bg-background">
+      <div className="relative w-screen h-screen overflow-hidden bg-black">
         <Navbar />
         <div className="flex items-center justify-center h-full">
           <p className="font-body text-muted-foreground animate-pulse">Loading...</p>
