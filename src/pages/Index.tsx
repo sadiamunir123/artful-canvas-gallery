@@ -23,6 +23,17 @@ const Index = () => {
     return () => clearInterval(id);
   }, [next, slides.length]);
 
+  // Preload neighbouring images for smoother transitions
+  useEffect(() => {
+    if (slides.length === 0) return;
+    const nextIdx = (current + 1) % slides.length;
+    const prevIdx = (current - 1 + slides.length) % slides.length;
+    [nextIdx, prevIdx].forEach((i) => {
+      const img = new Image();
+      img.src = slides[i].image;
+    });
+  }, [current, slides]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight") next();
@@ -47,28 +58,34 @@ const Index = () => {
     <div className="relative h-screen w-full overflow-hidden bg-background">
       <Navbar />
 
-      {slides.map((art, i) => (
-        <div
-          key={art.id}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
-            i === current ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
-        >
+      {slides.map((art, i) => {
+        const active = i === current;
+        return (
           <div
-            className="absolute inset-0 bg-center bg-no-repeat blur-3xl scale-110 opacity-30"
-            style={{ backgroundImage: `url(${art.image})`, backgroundSize: "cover" }}
-            aria-hidden
-          />
-          <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-4">
-            <img
-              src={art.image}
-              alt={art.title}
-              className="max-w-full max-h-full w-auto h-auto object-contain"
-              draggable={false}
+            key={art.id}
+            className={`absolute inset-0 transition-opacity duration-[1200ms] ease-out ${
+              active ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+          >
+            <div
+              className="absolute inset-0 bg-center bg-no-repeat blur-3xl scale-110 opacity-25"
+              style={{ backgroundImage: `url(${art.image})`, backgroundSize: "cover" }}
+              aria-hidden
             />
+            <div className="absolute inset-0 flex items-center justify-center p-3 sm:p-6 md:p-10 pt-20 sm:pt-24 pb-12 sm:pb-16">
+              <img
+                src={art.image}
+                alt={art.title}
+                loading={i === 0 ? "eager" : "lazy"}
+                className={`max-w-full max-h-full w-auto h-auto object-contain transition-transform duration-[1500ms] ease-out ${
+                  active ? "scale-100" : "scale-[0.98]"
+                }`}
+                draggable={false}
+              />
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {/* Minimal nav arrows */}
       <button
