@@ -45,7 +45,7 @@ const Index = () => {
 
   if (slides.length === 0) {
     return (
-      <div className="relative h-screen w-full overflow-hidden bg-background">
+      <div className="relative w-screen h-screen overflow-hidden bg-black">
         <Navbar />
         <div className="flex items-center justify-center h-full">
           <p className="font-body text-muted-foreground animate-pulse">Loading...</p>
@@ -55,7 +55,7 @@ const Index = () => {
   }
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-background">
+    <div className="relative w-screen h-screen overflow-hidden bg-black">
       <Navbar />
 
       {slides.map((art, i) => {
@@ -63,26 +63,17 @@ const Index = () => {
         return (
           <div
             key={art.id}
-            className={`absolute inset-0 transition-opacity duration-[1200ms] ease-out ${
+            className={`absolute inset-0 bg-black flex items-center justify-center transition-opacity duration-1000 ease-out ${
               active ? "opacity-100" : "opacity-0 pointer-events-none"
             }`}
           >
-            <div
-              className="absolute inset-0 bg-center bg-no-repeat blur-3xl scale-110 opacity-25"
-              style={{ backgroundImage: `url(${art.image})`, backgroundSize: "cover" }}
-              aria-hidden
+            <img
+              src={art.image}
+              alt={art.title}
+              loading={i === 0 ? "eager" : "lazy"}
+              className="w-full h-full object-contain"
+              draggable={false}
             />
-            <div className="absolute inset-0 flex items-center justify-center p-3 sm:p-6 md:p-10 pt-20 sm:pt-24 pb-12 sm:pb-16">
-              <img
-                src={art.image}
-                alt={art.title}
-                loading={i === 0 ? "eager" : "lazy"}
-                className={`max-w-full max-h-full w-auto h-auto object-contain transition-transform duration-[1500ms] ease-out ${
-                  active ? "scale-100" : "scale-[0.98]"
-                }`}
-                draggable={false}
-              />
-            </div>
           </div>
         );
       })}
