@@ -116,28 +116,26 @@ const Paintings = () => {
               <p className="font-body text-muted-foreground">No artworks match your filters.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
               {filtered.map((artwork) => (
                 <article
                   key={artwork.id}
-                  className="group cursor-pointer flex flex-col"
-                  onClick={() => setSelectedArtwork(artwork.id)}
+                  className="group flex flex-col bg-card border border-border/40 hover:border-primary/40 transition-colors h-full"
                 >
-                  <div className="relative overflow-hidden bg-secondary aspect-[4/5]">
+                  <div
+                    className="relative cursor-pointer flex items-center justify-center"
+                    style={{ height: "320px", backgroundColor: "#F5F5F3" }}
+                    onClick={() => setSelectedArtwork(artwork.id)}
+                  >
                     <img
                       src={artwork.image}
                       alt={artwork.title}
-                      className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${
+                      className={`transition-transform duration-500 group-hover:scale-[1.02] ${
                         artwork.available ? "" : "grayscale-[40%] opacity-90"
                       }`}
+                      style={{ width: "100%", height: "100%", objectFit: "contain", padding: "12px" }}
                       loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/0 to-background/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <div className="absolute inset-x-0 bottom-0 p-5 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
-                      <span className="inline-flex items-center gap-2 font-body text-xs tracking-widest uppercase text-foreground border border-foreground/60 px-4 py-1.5 backdrop-blur-sm">
-                        <ZoomIn size={12} /> View Details
-                      </span>
-                    </div>
                     {!artwork.available ? (
                       <div className="absolute top-3 right-3 bg-destructive/95 text-destructive-foreground font-body text-[10px] tracking-widest uppercase px-3 py-1 shadow-lg">
                         Sold
@@ -147,19 +145,51 @@ const Paintings = () => {
                         {artwork.category}
                       </div>
                     )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setZoomArtwork(artwork.id);
+                      }}
+                      aria-label="Zoom"
+                      className="absolute bottom-3 right-3 p-2 bg-card/85 backdrop-blur-sm border border-border/60 text-foreground/80 hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <ZoomIn size={14} />
+                    </button>
                   </div>
-                  <div className="mt-4 flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-display text-lg md:text-xl text-foreground group-hover:text-primary transition-colors truncate">
-                        {artwork.title}
-                      </h3>
-                      <p className="font-body text-xs sm:text-sm text-muted-foreground mt-1 truncate">
-                        {artwork.medium} — {artwork.year}
-                      </p>
-                    </div>
-                    <p className="font-body text-sm text-primary whitespace-nowrap pt-0.5">
+                  <div className="flex flex-col flex-1 p-4 gap-2">
+                    <h3
+                      onClick={() => setSelectedArtwork(artwork.id)}
+                      className="font-display text-foreground hover:text-primary transition-colors cursor-pointer truncate"
+                      style={{ fontSize: "16px", fontWeight: 500 }}
+                    >
+                      {artwork.title}
+                    </h3>
+                    <p className="font-body text-muted-foreground truncate" style={{ fontSize: "13px" }}>
+                      {artwork.medium} · {artwork.size}
+                    </p>
+                    <p className="font-body text-primary" style={{ fontSize: "15px", fontWeight: 500 }}>
                       Rs {artwork.price.toLocaleString()}
                     </p>
+                    <div className="mt-auto pt-2">
+                      {artwork.available ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addToCart(artwork);
+                          }}
+                          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground font-body text-xs tracking-widest uppercase hover:bg-primary/90 transition-colors"
+                        >
+                          <ShoppingCart size={14} /> Add to Cart
+                        </button>
+                      ) : (
+                        <button
+                          disabled
+                          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-border text-muted-foreground font-body text-xs tracking-widest uppercase cursor-not-allowed"
+                        >
+                          Sold Out
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </article>
               ))}
