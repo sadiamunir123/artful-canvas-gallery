@@ -19,11 +19,10 @@ const Index = () => {
 
   useEffect(() => {
     if (slides.length === 0) return;
-    const id = setInterval(next, 6000);
+    const id = setInterval(next, 5000);
     return () => clearInterval(id);
   }, [next, slides.length]);
 
-  // Preload neighbouring images for smoother transitions
   useEffect(() => {
     if (slides.length === 0) return;
     const nextIdx = (current + 1) % slides.length;
@@ -44,10 +43,15 @@ const Index = () => {
   }, [next, prev]);
 
   useEffect(() => {
-    if (slides.length === 0) return;
-    const id = setInterval(next, 5000);
-    return () => clearInterval(id);
-  }, [next, slides.length]);
+    const prevHtml = document.documentElement.style.overflow;
+    const prevBody = document.body.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.documentElement.style.overflow = prevHtml;
+      document.body.style.overflow = prevBody;
+    };
+  }, []);
 
   if (slides.length === 0) {
     return (
