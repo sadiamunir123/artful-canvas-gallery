@@ -124,7 +124,7 @@ const Paintings = () => {
                 >
                   <div
                     className="relative cursor-pointer flex items-center justify-center"
-                    style={{ height: "320px", backgroundColor: "#F5F5F3" }}
+                    style={{ height: "300px", backgroundColor: "#1a1a1a" }}
                     onClick={() => setSelectedArtwork(artwork.id)}
                   >
                     <img
