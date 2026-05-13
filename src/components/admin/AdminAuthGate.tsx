@@ -151,7 +151,7 @@ export const AdminAuthGate = ({ onAuthenticated }: AdminAuthGateProps) => {
             : "Sign in securely"}
         </Button>
 
-        {mode === "signin" && (
+        {mode === "signin" && typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1" && (
           <Button
             type="button"
             variant="outline"

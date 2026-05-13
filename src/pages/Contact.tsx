@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
+import BackButton from "@/components/BackButton";
 import Footer from "@/components/Footer";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
 
@@ -16,6 +17,7 @@ const Contact = () => {
   return (
     <div className="min-h-screen bg-page">
       <Navbar />
+      <BackButton />
 
       <div className="pt-24 pb-16 px-6 md:px-12">
         <div className="container mx-auto">
