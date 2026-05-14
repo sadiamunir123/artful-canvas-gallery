@@ -187,7 +187,12 @@ export const useAdminAuth = () => {
     setIsSubmitting(false);
 
     if (error) {
-      setAuthError(error.message);
+      console.error("[Admin sign-in] Supabase error:", error.message, error);
+      const hint =
+        error.message.toLowerCase().includes("invalid")
+          ? `${error.message} — If this account was created via Google sign-in, no password is set yet. Use "Forgot password?" below to set one.`
+          : error.message;
+      setAuthError(hint);
       return false;
     }
 
