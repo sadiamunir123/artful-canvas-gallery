@@ -56,23 +56,6 @@ const Navbar = () => {
             </span>
           </Link>
 
-          <ul className="hidden lg:flex items-center gap-8">
-            {navLinks.map((link) => {
-              const active = location.pathname === link.path;
-              return (
-                <li key={link.path}>
-                  <Link
-                    to={link.path}
-                    className="font-body text-sm tracking-widest uppercase transition-colors"
-                    style={{ color: active ? "#fff" : "rgba(255,255,255,0.65)" }}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-
           <div className="flex items-center gap-1 sm:gap-2">
             <Link to="/cart" aria-label="Cart" className="relative p-2" style={{ color: "#fff" }}>
               <ShoppingCart size={20} />
