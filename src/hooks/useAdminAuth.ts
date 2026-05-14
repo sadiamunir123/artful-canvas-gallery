@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const ADMIN_EMAIL = "iamsadiamunir@gmail.com";
 const ADMIN_PATH = "/admin";
 export const ADMIN_AUTH_ERROR_PARAM = "admin_error";
-export const ADMIN_REDIRECT_STORAGE_KEY = "haq_admin_redirect";
+const ADMIN_REDIRECT_STORAGE_KEY = "haq_admin_redirect";
 
 const normalizeEmail = (email: string | null | undefined): string => (email ?? "").trim().toLowerCase();
 
@@ -27,15 +27,6 @@ export const validatePasswordStrength = (password: string): string | null => {
 
 const isAdminEmail = (email: string | null | undefined): boolean =>
   normalizeEmail(email) === ADMIN_EMAIL;
-
-const rememberAdminRedirect = () => {
-  try {
-    window.localStorage.setItem(ADMIN_REDIRECT_STORAGE_KEY, ADMIN_PATH);
-    window.sessionStorage.setItem(ADMIN_REDIRECT_STORAGE_KEY, ADMIN_PATH);
-  } catch {
-    // Storage can be unavailable in strict/private browsers; the URL marker still handles redirects.
-  }
-};
 
 export const clearAdminRedirect = () => {
   try {
