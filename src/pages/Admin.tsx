@@ -338,7 +338,7 @@ const Admin = () => {
                   aria-label={`Select ${artwork.title}`}
                 />
               </div>
-              <img src={artwork.image} alt={artwork.title} className="w-full sm:w-20 h-40 sm:h-24 object-cover flex-shrink-0" />
+              <img src={artwork.image} alt={artwork.title} className="w-full sm:w-20 h-40 sm:h-24 object-contain bg-secondary flex-shrink-0" />
 
               {editingId === artwork.id ? (
                 <div className="flex-1">

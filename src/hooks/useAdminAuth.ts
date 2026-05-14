@@ -1,15 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 
 export const ADMIN_EMAIL = "iamsadiamunir@gmail.com";
 const ADMIN_PATH = "/admin";
-export const ADMIN_LOGIN_PARAM = "admin_login";
 export const ADMIN_AUTH_ERROR_PARAM = "admin_error";
-export const ADMIN_REDIRECT_STORAGE_KEY = "haq_admin_redirect";
-const LOVABLE_PROJECT_ID = "271daa9e-a0d1-4284-8864-d8601052c602";
-const OAUTH_MESSAGE_ORIGINS = ["https://oauth.lovable.app", "https://lovable.dev"];
+const ADMIN_REDIRECT_STORAGE_KEY = "haq_admin_redirect";
 
 const normalizeEmail = (email: string | null | undefined): string => (email ?? "").trim().toLowerCase();
 
@@ -31,101 +27,6 @@ export const validatePasswordStrength = (password: string): string | null => {
 
 const isAdminEmail = (email: string | null | undefined): boolean =>
   normalizeEmail(email) === ADMIN_EMAIL;
-
-const isLocalBrowser = () =>
-  typeof window !== "undefined" && ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
-
-const createOAuthState = () => {
-  const bytes = new Uint8Array(16);
-  window.crypto?.getRandomValues(bytes);
-  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
-};
-
-const signInWithLocalGooglePopup = () =>
-  new Promise<{ access_token: string; refresh_token: string }>((resolve, reject) => {
-    const state = createOAuthState();
-    const redirectUrl = new URL(ADMIN_PATH, window.location.origin);
-    redirectUrl.searchParams.set(ADMIN_LOGIN_PARAM, "1");
-    const params = new URLSearchParams({
-      project_id: LOVABLE_PROJECT_ID,
-      provider: "google",
-      redirect_uri: redirectUrl.toString(),
-      response_mode: "web_message",
-      state,
-      login_hint: ADMIN_EMAIL,
-      prompt: "select_account",
-    });
-
-    const popup = window.open(
-      `/~oauth/initiate?${params.toString()}`,
-      "admin-google-login",
-      "width=560,height=720,menubar=no,toolbar=no,location=yes,status=no,scrollbars=yes,resizable=yes",
-    );
-
-    if (!popup) {
-      reject(new Error("Popup was blocked. Please allow popups and try again."));
-      return;
-    }
-
-    const cleanup = () => {
-      window.removeEventListener("message", onMessage);
-      window.clearInterval(closedCheck);
-      window.clearTimeout(timeout);
-      popup.close();
-    };
-
-    const fail = (message: string) => {
-      cleanup();
-      reject(new Error(message));
-    };
-
-    function onMessage(event: MessageEvent) {
-      if (![...OAUTH_MESSAGE_ORIGINS, window.location.origin].includes(event.origin)) return;
-
-      const payload = event.data as { type?: string; response?: Record<string, string | undefined> } | Record<string, string | undefined> | null;
-      if (!payload || typeof payload !== "object") return;
-      const maybeWrappedResponse = (payload as { response?: Record<string, string | undefined> }).response;
-      const response: Record<string, string | undefined> = maybeWrappedResponse ?? (payload as Record<string, string | undefined>);
-      if ("type" in payload && payload.type && payload.type !== "authorization_response") return;
-
-      if (response.state !== state) {
-        fail("Google sign-in state did not match. Please try again.");
-        return;
-      }
-
-      if (response.error) {
-        fail(response.error_description ?? response.error);
-        return;
-      }
-
-      if (!response.access_token || !response.refresh_token) {
-        fail("No admin session was received from Google sign-in.");
-        return;
-      }
-
-      cleanup();
-      resolve({ access_token: response.access_token, refresh_token: response.refresh_token });
-    }
-
-    const closedCheck = window.setInterval(() => {
-      if (popup.closed) fail("Google sign-in was cancelled.");
-    }, 500);
-
-    const timeout = window.setTimeout(() => {
-      fail("Google sign-in timed out. Please try again.");
-    }, 120000);
-
-    window.addEventListener("message", onMessage);
-  });
-
-const rememberAdminRedirect = () => {
-  try {
-    window.localStorage.setItem(ADMIN_REDIRECT_STORAGE_KEY, ADMIN_PATH);
-    window.sessionStorage.setItem(ADMIN_REDIRECT_STORAGE_KEY, ADMIN_PATH);
-  } catch {
-    // Storage can be unavailable in strict/private browsers; the URL marker still handles redirects.
-  }
-};
 
 export const clearAdminRedirect = () => {
   try {
@@ -175,24 +76,13 @@ export const useAdminAuth = () => {
   const signIn = useCallback(async (email: string, password: string) => {
     setIsSubmitting(true);
     setAuthError(null);
-    rememberAdminRedirect();
-
-    if (!isAdminEmail(email)) {
-      setIsSubmitting(false);
-      setAuthError(`Only ${ADMIN_EMAIL} can access the admin panel.`);
-      return false;
-    }
 
     const { data, error } = await supabase.auth.signInWithPassword({ email: normalizeEmail(email), password });
     setIsSubmitting(false);
 
     if (error) {
       console.error("[Admin sign-in] Supabase error:", error.message, error);
-      const hint =
-        error.message.toLowerCase().includes("invalid")
-          ? `${error.message} — If this account was created via Google sign-in, no password is set yet. Use "Forgot password?" below to set one.`
-          : error.message;
-      setAuthError(hint);
+      setAuthError(error.message);
       return false;
     }
 
@@ -206,81 +96,6 @@ export const useAdminAuth = () => {
     window.history.replaceState(null, "", ADMIN_PATH);
     clearAdminRedirect();
 
-    return true;
-  }, []);
-
-  const signInWithGoogle = useCallback(async () => {
-    setIsSubmitting(true);
-    setAuthError(null);
-    rememberAdminRedirect();
-
-    if (isLocalBrowser()) {
-      const tokens = await signInWithLocalGooglePopup().catch((error: Error) => {
-        clearAdminRedirect();
-        setIsSubmitting(false);
-        setAuthError(`Google sign-in failed: ${error.message}`);
-        return null;
-      });
-
-      if (!tokens) return false;
-
-      const { data, error } = await supabase.auth.setSession(tokens);
-      setIsSubmitting(false);
-
-      if (error) {
-        clearAdminRedirect();
-        setAuthError(`Google sign-in failed: ${error.message}`);
-        return false;
-      }
-
-      if (!isAdminEmail(data.session?.user.email)) {
-        await supabase.auth.signOut();
-        clearAdminRedirect();
-        setAuthError(`Only ${ADMIN_EMAIL} can access the admin panel.`);
-        return false;
-      }
-
-      setSession(data.session);
-      window.history.replaceState(null, "", ADMIN_PATH);
-      clearAdminRedirect();
-      return true;
-    }
-
-    const redirectUrl = new URL(isLocalBrowser() ? ADMIN_PATH : "/", window.location.origin);
-    redirectUrl.searchParams.set(ADMIN_LOGIN_PARAM, "1");
-
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: redirectUrl.toString(),
-      extraParams: {
-        project_id: LOVABLE_PROJECT_ID,
-        login_hint: ADMIN_EMAIL,
-        prompt: "select_account",
-      },
-    });
-
-    setIsSubmitting(false);
-
-    if (result.error) {
-      clearAdminRedirect();
-      setAuthError(`Google sign-in failed: ${result.error.message}`);
-      return false;
-    }
-
-    if (result.redirected) {
-      return true;
-    }
-
-    const { data } = await supabase.auth.getSession();
-    setSession(data.session);
-
-    if (!isAdminEmail(data.session?.user.email)) {
-      clearAdminRedirect();
-      setAuthError(`Only ${ADMIN_EMAIL} can access the admin panel.`);
-      return false;
-    }
-
-    window.history.replaceState(null, "", ADMIN_PATH);
-    clearAdminRedirect();
     return true;
   }, []);
 
@@ -337,7 +152,6 @@ export const useAdminAuth = () => {
     isAdmin,
     authError,
     signIn,
-    signInWithGoogle,
     requestPasswordReset,
     updatePassword,
     signOut,

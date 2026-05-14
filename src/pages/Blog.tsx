@@ -54,7 +54,7 @@ const Blog = () => {
                 <img
                   src={post.image}
                   alt={post.title}
-                  className="w-full aspect-[16/9] object-cover"
+                  className="w-full aspect-[16/9] object-contain bg-secondary"
                 />
               </figure>
 
@@ -102,7 +102,7 @@ const Blog = () => {
                       <img
                         src={blogPosts[0].image}
                         alt={blogPosts[0].title}
-                        className="w-full aspect-[4/3] object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="w-full aspect-[4/3] object-contain bg-secondary transition-transform duration-700 group-hover:scale-105"
                       />
                     </div>
                     <div>
@@ -136,7 +136,7 @@ const Blog = () => {
                       <img
                         src={p.image}
                         alt={p.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="w-full h-full object-contain bg-secondary transition-transform duration-700 group-hover:scale-105"
                         loading="lazy"
                       />
                     </div>

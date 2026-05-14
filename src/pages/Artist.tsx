@@ -31,7 +31,7 @@ const Artist = () => {
               <img
                 src={portraitRoses}
                 alt="Artwork by Hadia Javed"
-                className="w-full max-h-[70vh] object-cover"
+                className="w-full max-h-[70vh] object-contain bg-secondary"
               />
               <div className="absolute -bottom-4 -left-4 w-full h-full border border-primary/20 -z-10" />
             </div>

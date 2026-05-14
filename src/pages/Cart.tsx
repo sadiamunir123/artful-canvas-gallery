@@ -115,7 +115,7 @@ const Cart = () => {
                   <div className="space-y-3 max-h-60 overflow-y-auto pr-1 mb-4">
                     {items.map(({ artwork }) => (
                       <div key={artwork.id} className="flex gap-3">
-                        <img src={artwork.image} alt={artwork.title} className="w-14 h-16 object-cover flex-shrink-0" />
+                        <img src={artwork.image} alt={artwork.title} className="w-14 h-16 object-contain flex-shrink-0 bg-secondary" />
                         <div className="flex-1 min-w-0">
                           <p className="font-body text-sm text-foreground truncate">{artwork.title}</p>
                           <p className="font-body text-xs text-muted-foreground truncate">{artwork.medium}</p>
@@ -147,7 +147,7 @@ const Cart = () => {
               <div className="space-y-4">
                 {items.map(({ artwork }) => (
                   <div key={artwork.id} className="flex gap-4 sm:gap-6 bg-secondary/40 border border-border p-3 sm:p-4">
-                    <img src={artwork.image} alt={artwork.title} className="w-20 h-28 sm:w-24 sm:h-32 object-cover flex-shrink-0" loading="lazy" />
+                    <img src={artwork.image} alt={artwork.title} className="w-20 h-28 sm:w-24 sm:h-32 object-contain flex-shrink-0 bg-secondary" loading="lazy" />
                     <div className="flex-1 min-w-0 flex flex-col justify-between">
                       <div>
                         <h3 className="font-display text-base sm:text-lg text-foreground truncate">{artwork.title}</h3>
