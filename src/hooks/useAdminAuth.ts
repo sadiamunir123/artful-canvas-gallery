@@ -85,7 +85,6 @@ export const useAdminAuth = () => {
   const signIn = useCallback(async (email: string, password: string) => {
     setIsSubmitting(true);
     setAuthError(null);
-    rememberAdminRedirect();
 
     if (!isAdminEmail(email)) {
       setIsSubmitting(false);
@@ -98,11 +97,7 @@ export const useAdminAuth = () => {
 
     if (error) {
       console.error("[Admin sign-in] Supabase error:", error.message, error);
-      const hint =
-        error.message.toLowerCase().includes("invalid")
-          ? `${error.message} — If this account was created via Google sign-in, no password is set yet. Use "Forgot password?" below to set one.`
-          : error.message;
-      setAuthError(hint);
+      setAuthError(error.message);
       return false;
     }
 
@@ -116,81 +111,6 @@ export const useAdminAuth = () => {
     window.history.replaceState(null, "", ADMIN_PATH);
     clearAdminRedirect();
 
-    return true;
-  }, []);
-
-  const signInWithGoogle = useCallback(async () => {
-    setIsSubmitting(true);
-    setAuthError(null);
-    rememberAdminRedirect();
-
-    if (isLocalBrowser()) {
-      const tokens = await signInWithLocalGooglePopup().catch((error: Error) => {
-        clearAdminRedirect();
-        setIsSubmitting(false);
-        setAuthError(`Google sign-in failed: ${error.message}`);
-        return null;
-      });
-
-      if (!tokens) return false;
-
-      const { data, error } = await supabase.auth.setSession(tokens);
-      setIsSubmitting(false);
-
-      if (error) {
-        clearAdminRedirect();
-        setAuthError(`Google sign-in failed: ${error.message}`);
-        return false;
-      }
-
-      if (!isAdminEmail(data.session?.user.email)) {
-        await supabase.auth.signOut();
-        clearAdminRedirect();
-        setAuthError(`Only ${ADMIN_EMAIL} can access the admin panel.`);
-        return false;
-      }
-
-      setSession(data.session);
-      window.history.replaceState(null, "", ADMIN_PATH);
-      clearAdminRedirect();
-      return true;
-    }
-
-    const redirectUrl = new URL(isLocalBrowser() ? ADMIN_PATH : "/", window.location.origin);
-    redirectUrl.searchParams.set(ADMIN_LOGIN_PARAM, "1");
-
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: redirectUrl.toString(),
-      extraParams: {
-        project_id: LOVABLE_PROJECT_ID,
-        login_hint: ADMIN_EMAIL,
-        prompt: "select_account",
-      },
-    });
-
-    setIsSubmitting(false);
-
-    if (result.error) {
-      clearAdminRedirect();
-      setAuthError(`Google sign-in failed: ${result.error.message}`);
-      return false;
-    }
-
-    if (result.redirected) {
-      return true;
-    }
-
-    const { data } = await supabase.auth.getSession();
-    setSession(data.session);
-
-    if (!isAdminEmail(data.session?.user.email)) {
-      clearAdminRedirect();
-      setAuthError(`Only ${ADMIN_EMAIL} can access the admin panel.`);
-      return false;
-    }
-
-    window.history.replaceState(null, "", ADMIN_PATH);
-    clearAdminRedirect();
     return true;
   }, []);
 
@@ -247,7 +167,6 @@ export const useAdminAuth = () => {
     isAdmin,
     authError,
     signIn,
-    signInWithGoogle,
     requestPasswordReset,
     updatePassword,
     signOut,
