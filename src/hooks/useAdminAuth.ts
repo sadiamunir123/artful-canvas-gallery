@@ -77,12 +77,6 @@ export const useAdminAuth = () => {
     setIsSubmitting(true);
     setAuthError(null);
 
-    if (!isAdminEmail(email)) {
-      setIsSubmitting(false);
-      setAuthError(`Only ${ADMIN_EMAIL} can access the admin panel.`);
-      return false;
-    }
-
     const { data, error } = await supabase.auth.signInWithPassword({ email: normalizeEmail(email), password });
     setIsSubmitting(false);
 
