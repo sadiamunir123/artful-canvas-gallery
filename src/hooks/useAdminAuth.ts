@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-export const ADMIN_EMAIL = "iamsadiamunir@gmail.com";
+export const ADMIN_EMAIL = "iamsadiamunir7788@gmail.com";
+const ADMIN_PASSWORD = "Admin123!";
 const ADMIN_PATH = "/admin";
 export const ADMIN_AUTH_ERROR_PARAM = "admin_error";
 const ADMIN_REDIRECT_STORAGE_KEY = "haq_admin_redirect";
@@ -26,7 +27,7 @@ export const validatePasswordStrength = (password: string): string | null => {
 };
 
 const isAdminEmail = (email: string | null | undefined): boolean =>
-  normalizeEmail(email) === ADMIN_EMAIL;
+  normalizeEmail(email) === normalizeEmail(ADMIN_EMAIL);
 
 export const clearAdminRedirect = () => {
   try {
@@ -37,17 +38,22 @@ export const clearAdminRedirect = () => {
   }
 };
 
+// In-memory admin session flag
+let hardcodedSessionActive = false;
+
 export const useAdminAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(() => readAdminAuthError());
+  const [hardcodedAdmin, setHardcodedAdmin] = useState(hardcodedSessionActive);
 
-  const user = session?.user ?? null;
-  const isAdmin = isAdminEmail(user?.email);
+  const user = hardcodedAdmin
+    ? ({ email: ADMIN_EMAIL, id: "hardcoded-admin" } as any)
+    : session?.user ?? null;
 
-  // Single source of truth for auth state. Restore persisted sessions and then
-  // keep the UI in sync without any role RPC calls or redirects.
+  const isAdmin = hardcodedAdmin || isAdminEmail(user?.email);
+
   useEffect(() => {
     let active = true;
 
@@ -77,12 +83,25 @@ export const useAdminAuth = () => {
     setIsSubmitting(true);
     setAuthError(null);
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email: normalizeEmail(email), password });
+    // Hardcoded admin check — works without Supabase auth
+    if (normalizeEmail(email) === normalizeEmail(ADMIN_EMAIL) && password === ADMIN_PASSWORD) {
+      hardcodedSessionActive = true;
+      setHardcodedAdmin(true);
+      setIsSubmitting(false);
+      window.history.replaceState(null, "", ADMIN_PATH);
+      clearAdminRedirect();
+      return true;
+    }
+
+    // Fallback: try Supabase
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: normalizeEmail(email),
+      password,
+    });
     setIsSubmitting(false);
 
     if (error) {
-      console.error("[Admin sign-in] Supabase error:", error.message, error);
-      setAuthError(error.message);
+      setAuthError("Invalid login credentials");
       return false;
     }
 
@@ -95,7 +114,6 @@ export const useAdminAuth = () => {
     setSession(data.session);
     window.history.replaceState(null, "", ADMIN_PATH);
     clearAdminRedirect();
-
     return true;
   }, []);
 
@@ -140,6 +158,8 @@ export const useAdminAuth = () => {
 
   const signOut = useCallback(async () => {
     setAuthError(null);
+    hardcodedSessionActive = false;
+    setHardcodedAdmin(false);
     await supabase.auth.signOut();
     setSession(null);
   }, []);
