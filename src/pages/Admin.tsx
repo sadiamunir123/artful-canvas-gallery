@@ -92,18 +92,20 @@ const Admin = () => {
 
   const handleSaveEdit = async () => {
     if (!editingId) return;
+    const updatePayload: Record<string, unknown> = {
+      title: form.title,
+      price: parseInt(form.price) || 0,
+      description: form.description,
+      medium: form.medium,
+      size: form.size,
+      year: form.year,
+      category: form.category,
+      available: form.available,
+    };
+    if (form.image_url) updatePayload.image_url = form.image_url;
     const { error } = await supabase
       .from("artworks")
-      .update({
-        title: form.title,
-        price: parseInt(form.price) || 0,
-        description: form.description,
-        medium: form.medium,
-        size: form.size,
-        year: form.year,
-        category: form.category,
-        available: form.available,
-      })
+      .update(updatePayload)
       .eq("id", editingId);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
