@@ -39,6 +39,12 @@ export interface Artwork {
   category: string;
 }
 
+function resolveImage(value: string | null | undefined): string {
+  if (!value) return purpleFabric;
+  if (/^https?:\/\//i.test(value) || value.startsWith("/")) return value;
+  return imageMap[value] ?? purpleFabric;
+}
+
 export function mapDbArtwork(db: DbArtwork): Artwork {
   return {
     id: db.id,
@@ -48,7 +54,7 @@ export function mapDbArtwork(db: DbArtwork): Artwork {
     medium: db.medium ?? "",
     size: db.size ?? "",
     year: db.year ?? "",
-    image: imageMap[db.image_url ?? ""] ?? purpleFabric,
+    image: resolveImage(db.image_url),
     available: db.available,
     category: db.category ?? "",
   };
