@@ -5,23 +5,14 @@ import { useArtworks } from "@/hooks/useArtworks";
 const Index = () => {
   const { data: paintings = [] } = useArtworks();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [zoomed, setZoomed] = useState(false);
 
   useEffect(() => {
     if (paintings.length === 0) return;
     const timer = setInterval(() => {
-      setZoomed(false);
-      setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % paintings.length);
-        setZoomed(true);
-      }, 1200);
+      setCurrentIndex((prev) => (prev + 1) % paintings.length);
     }, 5000);
     return () => clearInterval(timer);
   }, [paintings.length]);
-
-  useEffect(() => {
-    setZoomed(true);
-  }, [currentIndex]);
 
   useEffect(() => {
     const prevHtml = document.documentElement.style.overflow;
@@ -36,18 +27,12 @@ const Index = () => {
 
   const previousPainting = () => {
     if (paintings.length === 0) return;
-    setZoomed(false);
-    setTimeout(() => {
-      setCurrentIndex((prev) => (prev - 1 + paintings.length) % paintings.length);
-    }, 300);
+    setCurrentIndex((prev) => (prev - 1 + paintings.length) % paintings.length);
   };
 
   const nextPainting = () => {
     if (paintings.length === 0) return;
-    setZoomed(false);
-    setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1) % paintings.length);
-    }, 300);
+    setCurrentIndex((prev) => (prev + 1) % paintings.length);
   };
 
   return (
@@ -81,7 +66,6 @@ const Index = () => {
               justifyContent: "center",
               backgroundColor: "#000000",
               pointerEvents: index === currentIndex ? "auto" : "none",
-              overflow: "hidden",
             }}
           >
             <img
@@ -89,18 +73,16 @@ const Index = () => {
               alt={painting.title}
               draggable={false}
               style={{
-                width: "100vw",
-                height: "100vh",
-                objectFit: "cover",
-                objectPosition: "center",
+                maxWidth: "100vw",
+                maxHeight: "100vh",
+                width: "auto",
+                height: "auto",
+                objectFit: "contain",
                 display: "block",
-                transform: zoomed && index === currentIndex ? "scale(1.04)" : "scale(1)",
-                transition: "transform 4s ease-in-out, opacity 1.2s ease-in-out",
               }}
             />
           </div>
         ))}
-
         {paintings.length > 1 && (
           <>
             <button
