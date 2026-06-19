@@ -89,13 +89,13 @@ const Index = () => {
               alt={painting.title}
               draggable={false}
               style={{
-                width: "100vw",
-                height: "100vh",
-                objectFit: "cover",
+                maxWidth: "100%",
+                maxHeight: "100%",
+                width: "auto",
+                height: "auto",
+                objectFit: "contain",
                 objectPosition: "center",
                 display: "block",
-                transform: zoomed && index === currentIndex ? "scale(1.04)" : "scale(1)",
-                transition: "transform 4s ease-in-out, opacity 1.2s ease-in-out",
               }}
             />
           </div>
