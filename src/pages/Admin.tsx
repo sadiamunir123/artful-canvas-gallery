@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useArtworks, type Artwork } from "@/hooks/useArtworks";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
