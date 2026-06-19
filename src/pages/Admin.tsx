@@ -92,7 +92,7 @@ const Admin = () => {
 
   const handleSaveEdit = async () => {
     if (!editingId) return;
-    const updatePayload: Record<string, unknown> = {
+    const updatePayload: Partial<Tables<"artworks">> = {
       title: form.title,
       price: parseInt(form.price) || 0,
       description: form.description,
