@@ -223,18 +223,42 @@ const Admin = () => {
           />
         </div>
       ))}
-      {showAddForm && (
-        <div>
-          <label className="font-body text-xs tracking-widest uppercase text-muted-foreground block mb-1">Image Key</label>
-          <input
-            type="text"
-            value={form.image_url}
-            onChange={(e) => setForm((f) => ({ ...f, image_url: e.target.value }))}
-            className="w-full bg-secondary border border-border px-3 py-2 font-body text-sm text-foreground focus:outline-none focus:border-primary transition-colors"
-            placeholder="e.g. artwork-purple-fabric"
-          />
-        </div>
-      )}
+      <div className="md:col-span-2">
+        <label className="font-body text-xs tracking-widest uppercase text-muted-foreground block mb-1">
+          Painting Image {editingId ? "(leave empty to keep current)" : ""}
+        </label>
+        <input
+          type="file"
+          accept="image/*"
+          disabled={uploading}
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            setUploading(true);
+            const ext = file.name.split(".").pop() || "jpg";
+            const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+            const { error: upErr } = await supabase.storage
+              .from("artworks")
+              .upload(path, file, { contentType: file.type, upsert: false });
+            if (upErr) {
+              toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
+            } else {
+              const { data } = supabase.storage.from("artworks").getPublicUrl(path);
+              setForm((f) => ({ ...f, image_url: data.publicUrl }));
+              toast({ title: "Image uploaded" });
+            }
+            setUploading(false);
+          }}
+          className="w-full bg-secondary border border-border px-3 py-2 font-body text-sm text-foreground file:mr-3 file:py-1 file:px-3 file:border-0 file:bg-primary file:text-primary-foreground file:cursor-pointer"
+        />
+        {form.image_url && (
+          <div className="mt-2 flex items-center gap-3">
+            <img src={form.image_url.startsWith("http") ? form.image_url : ""} alt="preview" className="w-24 h-24 object-contain bg-secondary border border-border" />
+            <span className="font-body text-xs text-muted-foreground break-all">{form.image_url}</span>
+          </div>
+        )}
+      </div>
+
       <div className="md:col-span-2">
         <label className="font-body text-xs tracking-widest uppercase text-muted-foreground block mb-1">Description</label>
         <textarea
