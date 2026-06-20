@@ -95,6 +95,7 @@ export const AdminAuthGate = ({ onAuthenticated }: AdminAuthGateProps) => {
             onChange={(e) => setForm((c) => ({ ...c, email: e.target.value }))}
             className="bg-secondary"
             autoComplete="email"
+            placeholder="Enter admin email"
             required
           />
         </div>
