@@ -101,50 +101,6 @@ const Index = () => {
           </div>
         ))}
 
-        {paintings.length > 1 && (
-          <>
-            <button
-              onClick={previousPainting}
-              aria-label="Previous painting"
-              style={{
-                position: "absolute",
-                left: "20px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                background: "rgba(255,255,255,0.2)",
-                border: "none",
-                color: "#fff",
-                fontSize: "24px",
-                padding: "12px 16px",
-                cursor: "pointer",
-                borderRadius: "4px",
-                zIndex: 10,
-              }}
-            >
-              ‹
-            </button>
-            <button
-              onClick={nextPainting}
-              aria-label="Next painting"
-              style={{
-                position: "absolute",
-                right: "20px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                background: "rgba(255,255,255,0.2)",
-                border: "none",
-                color: "#fff",
-                fontSize: "24px",
-                padding: "12px 16px",
-                cursor: "pointer",
-                borderRadius: "4px",
-                zIndex: 10,
-              }}
-            >
-              ›
-            </button>
-          </>
-        )}
       </div>
     </div>
   );
