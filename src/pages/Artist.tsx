@@ -42,13 +42,18 @@ const Artist = () => {
         <div className="container mx-auto px-6 md:px-12 mt-24">
           <div className="max-w-3xl mx-auto text-center">
             <p className="font-body text-xs tracking-[0.3em] uppercase text-primary mb-4">Artist Statement</p>
-            <h2 className="font-display text-3xl text-foreground mb-8">Where Memory Meets Canvas</h2>
-            <blockquote className="font-elegant text-xl text-foreground/80 leading-relaxed italic">
-              "My paintings are not just about places, but about the feelings and atmosphere connected to them — turning simple environments into intimate and expressive landscapes. Instead of creating exact or realistic scenes, I use strong colors and slight stylization to express the emotional truth of a space."
-            </blockquote>
-            <div className="brand-line w-24 mx-auto mt-8" />
+            <h2 className="font-display text-3xl md:text-4xl text-foreground mb-8">Where Memory Meets Canvas</h2>
+            <div className="relative inline-block">
+              <span aria-hidden className="absolute -top-6 -left-4 md:-top-10 md:-left-8 font-display text-6xl md:text-8xl text-primary/30 leading-none select-none">“</span>
+              <blockquote className="font-elegant text-xl md:text-2xl text-foreground/85 leading-relaxed italic px-2 md:px-6">
+                My paintings are not just about places, but about the feelings and atmosphere connected to them — turning simple environments into intimate and expressive landscapes. Instead of creating exact or realistic scenes, I use strong colors and slight stylization to express the emotional truth of a space.
+              </blockquote>
+              <span aria-hidden className="absolute -bottom-12 -right-4 md:-bottom-16 md:-right-8 font-display text-6xl md:text-8xl text-primary/30 leading-none select-none">”</span>
+            </div>
+            <div className="brand-line w-24 mx-auto mt-10" />
           </div>
         </div>
+
 
         {/* Achievements */}
         <div className="container mx-auto px-6 md:px-12 mt-24">
