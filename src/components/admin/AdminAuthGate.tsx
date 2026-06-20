@@ -4,7 +4,7 @@ import { Eye, EyeOff, Lock, LogIn, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { ADMIN_EMAIL, useAdminAuth } from "@/hooks/useAdminAuth";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 type AdminAuthGateProps = {
   onAuthenticated: (session: { user: User; signOut: () => Promise<void> }) => ReactNode;
