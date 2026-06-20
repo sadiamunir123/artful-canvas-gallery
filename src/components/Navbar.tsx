@@ -53,14 +53,10 @@ const Navbar = () => {
           <Link to="/" className="flex items-center gap-3 shrink-0" aria-label="HAQ Arts home">
             <img src={logo} alt="HAQ Arts" className="h-9 w-auto" />
             <span
-              className="font-display tracking-[0.18em]"
-              style={{
-                color: "#fff",
-                fontSize: "clamp(15px, 1.6vw, 19px)",
-                fontWeight: 500,
-              }}
+              className="font-display tracking-wider"
+              style={{ color: "#fff", fontSize: "clamp(15px, 1.6vw, 19px)", fontWeight: 500 }}
             >
-              HAQ <span style={{ color: "hsl(var(--primary))" }}>·</span> ARTS
+              HAQ Arts
             </span>
           </Link>
 
