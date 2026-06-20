@@ -42,17 +42,25 @@ const Navbar = () => {
           width: "100%",
           height: 64,
           zIndex: 200,
-          background: "rgba(0,0,0,0.75)",
-          backdropFilter: "blur(8px)",
-          WebkitBackdropFilter: "blur(8px)",
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          background: "rgba(0,0,0,0.78)",
+          backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)",
+          borderBottom: "1px solid rgba(201,168,76,0.18)",
+          boxShadow: "0 1px 0 0 rgba(201,168,76,0.06)",
         }}
       >
         <div className="mx-auto h-full flex items-center justify-between px-4 sm:px-6 lg:px-10 max-w-[1400px]">
           <Link to="/" className="flex items-center gap-3 shrink-0" aria-label="HAQ Arts home">
             <img src={logo} alt="HAQ Arts" className="h-9 w-auto" />
-            <span className="font-display text-base md:text-lg tracking-wider" style={{ color: "#fff" }}>
-              HAQ Arts
+            <span
+              className="font-display tracking-[0.18em]"
+              style={{
+                color: "#fff",
+                fontSize: "clamp(15px, 1.6vw, 19px)",
+                fontWeight: 500,
+              }}
+            >
+              HAQ <span style={{ color: "hsl(var(--primary))" }}>·</span> ARTS
             </span>
           </Link>
 
@@ -77,6 +85,7 @@ const Navbar = () => {
           </div>
         </div>
       </nav>
+
 
       {/* Fullscreen overlay menu */}
       <div
