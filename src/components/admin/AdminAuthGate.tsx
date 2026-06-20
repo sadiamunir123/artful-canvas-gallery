@@ -4,7 +4,7 @@ import { Eye, EyeOff, Lock, LogIn, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { ADMIN_EMAIL, useAdminAuth } from "@/hooks/useAdminAuth";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 type AdminAuthGateProps = {
   onAuthenticated: (session: { user: User; signOut: () => Promise<void> }) => ReactNode;
@@ -21,7 +21,7 @@ export const AdminAuthGate = ({ onAuthenticated }: AdminAuthGateProps) => {
     requestPasswordReset,
     signOut,
   } = useAdminAuth();
-  const [form, setForm] = useState({ email: ADMIN_EMAIL, password: "" });
+  const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [mode, setMode] = useState<"signin" | "forgot">("signin");
 
@@ -95,6 +95,7 @@ export const AdminAuthGate = ({ onAuthenticated }: AdminAuthGateProps) => {
             onChange={(e) => setForm((c) => ({ ...c, email: e.target.value }))}
             className="bg-secondary"
             autoComplete="email"
+            placeholder="Enter admin email"
             required
           />
         </div>
