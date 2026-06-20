@@ -21,7 +21,7 @@ export const AdminAuthGate = ({ onAuthenticated }: AdminAuthGateProps) => {
     requestPasswordReset,
     signOut,
   } = useAdminAuth();
-  const [form, setForm] = useState({ email: ADMIN_EMAIL, password: "" });
+  const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [mode, setMode] = useState<"signin" | "forgot">("signin");
 
