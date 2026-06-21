@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { Trash2, ShoppingBag, ArrowLeft, CheckCircle, Truck, ShieldCheck, Lock } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import Navbar from "@/components/Navbar";
-import BackButton from "@/components/BackButton";
 import Footer from "@/components/Footer";
 
 const SHIPPING_FLAT = 1500; // Rs flat domestic shipping
@@ -31,7 +30,6 @@ const Cart = () => {
     return (
       <div className="min-h-screen bg-page">
         <Navbar />
-      <BackButton />
         <div className="pt-24 pb-16 px-4 sm:px-6 md:px-12 flex items-center justify-center min-h-[80vh]">
           <div className="text-center max-w-lg w-full bg-secondary/30 border border-border p-8 md:p-12">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/15 mb-6">

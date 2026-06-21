@@ -1,5 +1,4 @@
 import Navbar from "@/components/Navbar";
-import BackButton from "@/components/BackButton";
 import Footer from "@/components/Footer";
 import portraitRoses from "@/assets/artwork-portrait-roses.jpg";
 
@@ -7,7 +6,6 @@ const Artist = () => {
   return (
     <div className="min-h-screen bg-page">
       <Navbar />
-      <BackButton />
 
       <div className="pt-24 pb-16">
         {/* Hero section */}
