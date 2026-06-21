@@ -2,7 +2,6 @@ import { useState } from "react";
 import { ArrowLeft, Calendar, Tag, Clock } from "lucide-react";
 import { blogPosts } from "@/data/blogPosts";
 import Navbar from "@/components/Navbar";
-import BackButton from "@/components/BackButton";
 import Footer from "@/components/Footer";
 
 const formatDate = (d: string) =>
@@ -17,7 +16,6 @@ const Blog = () => {
   return (
     <div className="min-h-screen bg-page">
       <Navbar />
-      <BackButton />
       <div className="pt-24 md:pt-28 pb-16 px-4 sm:px-6 md:px-12">
         <div className="container mx-auto">
           {post ? (
