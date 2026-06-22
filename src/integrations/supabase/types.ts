@@ -59,6 +59,32 @@ export type Database = {
         }
         Relationships: []
       }
+      order_checkout_validations: {
+        Row: {
+          created_at: string
+          expires_at: string
+          order_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          order_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_checkout_validations_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           artwork_id: string
