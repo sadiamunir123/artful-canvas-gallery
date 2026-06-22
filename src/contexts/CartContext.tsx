@@ -50,24 +50,28 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     if (items.length === 0) return false;
     setIsSubmitting(true);
     try {
-      // Create order
-      const { data: order, error: orderError } = await supabase
+      // Generate order id client-side so we don't need SELECT permission.
+      // (Anonymous customers can INSERT orders but cannot read them back — orders are admin-only.)
+      const orderId = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+      // Create the pending order
+      const { error: orderError } = await supabase
         .from("orders")
         .insert({
-          customer_name: customer.name,
-          customer_email: customer.email,
-          customer_phone: customer.phone,
-          customer_address: customer.address,
+          id: orderId,
+          customer_name: customer.name.trim(),
+          customer_email: customer.email.trim(),
+          customer_phone: customer.phone.trim(),
+          customer_address: customer.address.trim(),
           total_price: totalPrice,
-        })
-        .select()
-        .single();
+          status: "pending",
+        });
 
       if (orderError) throw orderError;
 
-      // Create order items (this triggers mark_artwork_sold)
+      // Create order items — RLS validates each against the pending order above
       const orderItems = items.map((item) => ({
-        order_id: order.id,
+        order_id: orderId,
         artwork_id: item.artwork.id,
         price_at_purchase: item.artwork.price,
       }));
