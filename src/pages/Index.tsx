@@ -53,6 +53,24 @@ const Index = () => {
 
   return (
     <div style={{ height: "100vh", overflow: "hidden" }}>
+      <SEO
+        title="HAQ Arts — Original Paintings by Hadia Javed"
+        description="Premium online gallery of original oil and acrylic paintings by Lahore-based visual artist Hadia Javed. Browse, collect, and commission artworks."
+        path="/"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "HAQ Arts",
+          url: "https://palette-showcase-gallery.lovable.app/",
+          author: { "@type": "Person", name: "Hadia Javed" },
+        }}
+      />
+      <h1 className="sr-only">HAQ Arts — Original Paintings and Visual Art by Hadia Javed</h1>
+      <p className="sr-only">
+        HAQ Arts is the online gallery of Lahore-based visual artist Hadia Javed,
+        featuring original oil and acrylic paintings, commissioned artworks, and
+        art services. Browse the rotating slideshow or explore the full collection.
+      </p>
       <Navbar />
       <div
         style={{
