@@ -3,6 +3,7 @@ import { ArrowLeft, Calendar, Tag, Clock } from "lucide-react";
 import { blogPosts } from "@/data/blogPosts";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 
 const formatDate = (d: string) =>
   new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
@@ -15,7 +16,28 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen bg-page">
+      <SEO
+        title={post ? `${post.title} — HAQ Arts Journal` : "Journal — Stories Behind the Paintings | HAQ Arts"}
+        description={
+          post
+            ? post.excerpt ?? `Read "${post.title}" — a journal entry from Hadia Javed on the practice and concepts behind her paintings.`
+            : "The HAQ Arts journal — conceptual stories, process notes, and the thinking behind Hadia Javed's paintings."
+        }
+        path={post ? `/blog#${post.id}` : "/blog"}
+        jsonLd={
+          post
+            ? {
+                "@context": "https://schema.org",
+                "@type": "Article",
+                headline: post.title,
+                author: { "@type": "Person", name: "Hadia Javed" },
+                datePublished: post.date,
+              }
+            : undefined
+        }
+      />
       <Navbar />
+
       <div className="pt-24 md:pt-28 pb-16 px-4 sm:px-6 md:px-12">
         <div className="container mx-auto">
           {post ? (

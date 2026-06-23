@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { Link } from "react-router-dom";
 import { Palette, Brush, Frame, Wallpaper } from "lucide-react";
 
@@ -29,7 +30,19 @@ const services = [
 const Services = () => {
   return (
     <div className="min-h-screen bg-page">
+      <SEO
+        title="Art Services — Consultation, Workshops & Commissions | HAQ Arts"
+        description="Art consultation, painting workshops, commissioned artworks, and hand-painted wall murals by Hadia Javed. Tailored creative services from Lahore."
+        path="/services"
+        jsonLd={[
+          { "@context": "https://schema.org", "@type": "Service", name: "Art Consultation", provider: { "@type": "Person", name: "Hadia Javed" } },
+          { "@context": "https://schema.org", "@type": "Service", name: "Workshops & Art Classes", provider: { "@type": "Person", name: "Hadia Javed" } },
+          { "@context": "https://schema.org", "@type": "Service", name: "Commissioned Artworks", provider: { "@type": "Person", name: "Hadia Javed" } },
+          { "@context": "https://schema.org", "@type": "Service", name: "Wall Murals & Decoration", provider: { "@type": "Person", name: "Hadia Javed" } },
+        ]}
+      />
       <Navbar />
+
 
       <div className="pt-24 pb-16 px-6 md:px-12">
         <div className="container mx-auto">

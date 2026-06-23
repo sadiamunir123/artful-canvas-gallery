@@ -4,6 +4,7 @@ import { Trash2, ShoppingBag, ArrowLeft, CheckCircle, Truck, ShieldCheck, Lock }
 import { useCart } from "@/contexts/CartContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 
 const SHIPPING_FLAT = 1500; // Rs flat domestic shipping
 const FREE_SHIPPING_THRESHOLD = 100000;
