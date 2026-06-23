@@ -1,20 +1,21 @@
 import { useCallback, useEffect, useState } from "react";
-import type { Session } from "@supabase/supabase-js";
+import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-export const ADMIN_EMAIL = "iamsadiamunir7788@gmail.com";
-const ADMIN_PASSWORD = "Admin123!";
-const ADMIN_PATH = "/admin";
 export const ADMIN_AUTH_ERROR_PARAM = "admin_error";
+const ADMIN_PATH = "/admin";
 const ADMIN_REDIRECT_STORAGE_KEY = "haq_admin_redirect";
 
-const normalizeEmail = (email: string | null | undefined): string => (email ?? "").trim().toLowerCase();
+const normalizeEmail = (email: string | null | undefined): string =>
+  (email ?? "").trim().toLowerCase();
 
 const readAdminAuthError = (): string | null => {
   if (typeof window === "undefined") return null;
-
   const params = new URLSearchParams(window.location.search);
-  const message = params.get(ADMIN_AUTH_ERROR_PARAM) ?? params.get("error_description") ?? params.get("error");
+  const message =
+    params.get(ADMIN_AUTH_ERROR_PARAM) ??
+    params.get("error_description") ??
+    params.get("error");
   return message ? decodeURIComponent(message.replace(/\+/g, " ")) : null;
 };
 
@@ -26,9 +27,6 @@ export const validatePasswordStrength = (password: string): string | null => {
   return null;
 };
 
-const isAdminEmail = (email: string | null | undefined): boolean =>
-  normalizeEmail(email) === normalizeEmail(ADMIN_EMAIL);
-
 export const clearAdminRedirect = () => {
   try {
     window.localStorage.removeItem(ADMIN_REDIRECT_STORAGE_KEY);
@@ -38,40 +36,54 @@ export const clearAdminRedirect = () => {
   }
 };
 
-// In-memory admin session flag
-let hardcodedSessionActive = false;
+const checkIsAdmin = async (userId: string | undefined | null): Promise<boolean> => {
+  if (!userId) return false;
+  const { data, error } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  if (error) {
+    console.error("Failed to verify admin role", error);
+    return false;
+  }
+  return !!data;
+};
 
 export const useAdminAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(() => readAdminAuthError());
-  const [hardcodedAdmin, setHardcodedAdmin] = useState(hardcodedSessionActive);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [roleChecked, setRoleChecked] = useState(false);
 
-  const user = hardcodedAdmin
-    ? ({ email: ADMIN_EMAIL, id: "hardcoded-admin" } as any)
-    : session?.user ?? null;
-
-  const isAdmin = hardcodedAdmin || isAdminEmail(user?.email);
+  const user: User | null = session?.user ?? null;
 
   useEffect(() => {
     let active = true;
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const applySession = async (nextSession: Session | null) => {
       if (!active) return;
       setSession(nextSession);
+      const admin = await checkIsAdmin(nextSession?.user?.id);
+      if (!active) return;
+      setIsAdmin(admin);
+      setRoleChecked(true);
       setIsReady(true);
+    };
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      // Defer Supabase calls to avoid deadlocks inside the auth callback.
+      setTimeout(() => {
+        void applySession(nextSession);
+      }, 0);
     });
 
-    void supabase.auth
-      .getSession()
-      .then(({ data }) => {
-        if (!active) return;
-        setSession(data.session);
-      })
-      .finally(() => {
-        if (active) setIsReady(true);
-      });
+    void supabase.auth.getSession().then(({ data }) => {
+      void applySession(data.session);
+    });
 
     return () => {
       active = false;
@@ -83,35 +95,29 @@ export const useAdminAuth = () => {
     setIsSubmitting(true);
     setAuthError(null);
 
-    // Hardcoded admin check — works without Supabase auth
-    if (normalizeEmail(email) === normalizeEmail(ADMIN_EMAIL) && password === ADMIN_PASSWORD) {
-      hardcodedSessionActive = true;
-      setHardcodedAdmin(true);
-      setIsSubmitting(false);
-      window.history.replaceState(null, "", ADMIN_PATH);
-      clearAdminRedirect();
-      return true;
-    }
-
-    // Fallback: try Supabase
     const { data, error } = await supabase.auth.signInWithPassword({
       email: normalizeEmail(email),
       password,
     });
-    setIsSubmitting(false);
 
     if (error) {
-      setAuthError("Invalid login credentials");
+      setIsSubmitting(false);
+      setAuthError("Invalid email or password.");
       return false;
     }
 
-    if (!isAdminEmail(data.user?.email)) {
+    const admin = await checkIsAdmin(data.user?.id);
+    setIsSubmitting(false);
+
+    if (!admin) {
       await supabase.auth.signOut();
-      setAuthError(`Only ${ADMIN_EMAIL} can access the admin panel.`);
+      setAuthError("This account is not authorized as admin.");
       return false;
     }
 
     setSession(data.session);
+    setIsAdmin(true);
+    setRoleChecked(true);
     window.history.replaceState(null, "", ADMIN_PATH);
     clearAdminRedirect();
     return true;
@@ -120,12 +126,6 @@ export const useAdminAuth = () => {
   const requestPasswordReset = useCallback(async (email: string) => {
     setIsSubmitting(true);
     setAuthError(null);
-
-    if (!isAdminEmail(email)) {
-      setIsSubmitting(false);
-      setAuthError(`Password reset is only available for ${ADMIN_EMAIL}.`);
-      return false;
-    }
 
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo: `${window.location.origin}/reset-password`,
@@ -138,7 +138,7 @@ export const useAdminAuth = () => {
       return false;
     }
 
-    setAuthError("Password reset email sent. Check your inbox and spam folder.");
+    setAuthError("If that email is an admin, a reset link has been sent. Check your inbox and spam folder.");
     return true;
   }, []);
 
@@ -158,16 +158,15 @@ export const useAdminAuth = () => {
 
   const signOut = useCallback(async () => {
     setAuthError(null);
-    hardcodedSessionActive = false;
-    setHardcodedAdmin(false);
     await supabase.auth.signOut();
     setSession(null);
+    setIsAdmin(false);
   }, []);
 
   return {
     session,
     user,
-    isLoading: !isReady,
+    isLoading: !isReady || !roleChecked,
     isSubmitting,
     isAdmin,
     authError,
