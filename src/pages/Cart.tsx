@@ -4,6 +4,7 @@ import { Trash2, ShoppingBag, ArrowLeft, CheckCircle, Truck, ShieldCheck, Lock }
 import { useCart } from "@/contexts/CartContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 
 const SHIPPING_FLAT = 1500; // Rs flat domestic shipping
 const FREE_SHIPPING_THRESHOLD = 100000;
@@ -59,7 +60,13 @@ const Cart = () => {
 
   return (
     <div className="min-h-screen bg-page">
+      <SEO
+        title="Your Cart — Checkout | HAQ Arts"
+        description="Review the original paintings in your cart and complete your order. Secure checkout with flat-rate domestic shipping across Pakistan."
+        path="/cart"
+      />
       <Navbar />
+
       <div className="pt-24 md:pt-28 pb-16 px-4 sm:px-6 md:px-12">
         <div className="container mx-auto max-w-6xl">
           <div className="mb-8">

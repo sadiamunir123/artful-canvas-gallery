@@ -1,0 +1,18 @@
+# HAQ Arts
+
+> Premium online art gallery by Hadia Javed — original oil and acrylic paintings, commissioned artworks, and art services from Lahore, Pakistan.
+
+HAQ Arts showcases the work of Lahore-based visual artist Hadia Javed (BFA, Punjab University College of Art and Design, 2023). Her practice transforms ordinary spaces into meaningful visual experiences through memory and personal interpretation, using strong color and gentle stylization.
+
+## Pages
+
+- [Home](/): Full-screen slideshow of original paintings.
+- [Paintings](/paintings): Browse and purchase original oil and acrylic paintings (prices in PKR).
+- [Artist](/artist): About Hadia Javed — background, practice, and statement.
+- [Services](/services): Art consultation, workshops, commissioned artworks, and wall murals.
+- [Blog](/blog): Conceptual stories behind the paintings and notes on the artist's process.
+- [Contact](/contact): Inquire about purchases, commissions, and collaborations.
+
+## Optional
+
+- [Cart](/cart): Checkout for original artworks.

@@ -5,6 +5,7 @@ import { useArtworks } from "@/hooks/useArtworks";
 import { useCart } from "@/contexts/CartContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import ArtworkZoom from "@/components/ArtworkZoom";
 
 type SortKey = "newest" | "price-asc" | "price-desc" | "title";
@@ -52,7 +53,13 @@ const Paintings = () => {
 
   return (
     <div className="min-h-screen bg-page">
+      <SEO
+        title="Paintings Collection — Original Oil & Acrylic Art | HAQ Arts"
+        description="Browse and purchase original oil and acrylic paintings by Hadia Javed. Filter by category, availability, and price — every piece is one of a kind."
+        path="/paintings"
+      />
       <Navbar />
+
 
       <div className="pt-24 md:pt-28 pb-16 px-4 sm:px-6 md:px-12">
         <div className="container mx-auto">

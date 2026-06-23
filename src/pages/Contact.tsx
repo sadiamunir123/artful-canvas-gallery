@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
 
 const Contact = () => {
@@ -15,7 +16,13 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-page">
+      <SEO
+        title="Contact HAQ Arts — Inquire, Commission, Collaborate"
+        description="Get in touch with Hadia Javed and HAQ Arts about purchasing paintings, commissioning custom work, or creative collaborations."
+        path="/contact"
+      />
       <Navbar />
+
 
       <div className="pt-24 pb-16 px-6 md:px-12">
         <div className="container mx-auto">

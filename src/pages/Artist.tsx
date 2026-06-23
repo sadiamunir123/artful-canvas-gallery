@@ -1,11 +1,29 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import portraitRoses from "@/assets/artwork-portrait-roses.jpg";
 
 const Artist = () => {
   return (
     <div className="min-h-screen bg-page">
+      <SEO
+        title="Hadia Javed — Lahore-Based Visual Artist | HAQ Arts"
+        description="Meet Hadia Javed, a Lahore-based visual artist working in oil and acrylic. BFA from PUCAD (2023). Read her statement and explore her practice."
+        path="/artist"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Person",
+          name: "Hadia Javed",
+          jobTitle: "Visual Artist",
+          url: "https://palette-showcase-gallery.lovable.app/artist",
+          alumniOf: "Punjab University College of Art and Design",
+          address: { "@type": "PostalAddress", addressLocality: "Lahore", addressCountry: "PK" },
+          description:
+            "Lahore-based visual artist working primarily in acrylic and oil painting, exploring memory and personal interpretation.",
+        }}
+      />
       <Navbar />
+
 
       <div className="pt-24 pb-16">
         {/* Hero section */}
