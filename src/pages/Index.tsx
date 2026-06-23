@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
+import SEO from "@/components/SEO";
 import { useArtworks } from "@/hooks/useArtworks";
 
 const Index = () => {
