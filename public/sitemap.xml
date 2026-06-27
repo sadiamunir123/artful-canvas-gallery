@@ -26,6 +26,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://palette-showcase-gallery.lovable.app/blog/buying-original-art-online</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://palette-showcase-gallery.lovable.app/contact</loc>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
