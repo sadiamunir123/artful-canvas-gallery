@@ -11,6 +11,7 @@ import Services from "./pages/Services.tsx";
 import Contact from "./pages/Contact.tsx";
 import Cart from "./pages/Cart.tsx";
 import Blog from "./pages/Blog.tsx";
+import BuyingOriginalArtOnline from "./pages/BuyingOriginalArtOnline.tsx";
 import Admin from "./pages/Admin.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import NotFound from "./pages/NotFound.tsx";
