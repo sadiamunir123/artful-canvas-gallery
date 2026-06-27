@@ -107,6 +107,11 @@ const Index = () => {
               src={painting.image}
               alt={painting.title}
               draggable={false}
+              width={1920}
+              height={1080}
+              loading={index === 0 ? "eager" : "lazy"}
+              fetchPriority={index === 0 ? "high" : "low"}
+              decoding={index === 0 ? "sync" : "async"}
               style={{
                 maxWidth: "100%",
                 maxHeight: "100%",
